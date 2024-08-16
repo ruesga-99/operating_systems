@@ -1,2 +1,17 @@
-# operating_systems
-This repository contains various programs that simulate request management using different scheduling algortithms and memory management within an operating system.
+# Operating Systems
+This repository contains various programs that simulate request management using different scheduling algortithms and memory management within an operating system. 
+
+## List of Implemented Algorithms
+
+<dl>
+  <dd> &nbsp&nbsp 📆 Batch Processing </dd>
+</dl>
+
+## Emoji Key
+✅ (Completed): This emoji is used to mark tasks that have been finished and require no further work.
+
+📆 (Planned): This emoji is used for tasks that are planned for the future, indicating they are on the work calendar. The corresponding file does not exist within the repository.
+
+🚧 (Under Construction): This emoji indicates tasks that have been implemented but still need further improvements or adjustments. There is already a corresponding file within the repository but hasn't been fully developed.
+
+💡 (Planning Ongoing): This emoji is used for sections that haven't been completely defined on their components. 
