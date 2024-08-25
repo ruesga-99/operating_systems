@@ -65,7 +65,7 @@ vector<Process> generateBatches () {
     return tasks;
 }
 
-void executeProcess (Process temp) {
+void executeProcess (Process &temp) {
     temp.updateTime();
     cout << temp.toString();
 }
@@ -103,4 +103,4 @@ int main () {
     cout << "Pending Batches: " << pendingBatches << "\n\n";
 
     return 0;
-}
+}  
