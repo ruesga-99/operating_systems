@@ -6,6 +6,7 @@
 #include <windows.h>
 
 #include "Process.hpp"
+#include "Interface.hpp"
 
 using namespace std;
 

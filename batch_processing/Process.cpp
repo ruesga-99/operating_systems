@@ -14,6 +14,10 @@ string Process::getName() {
     return this->name;
 }
 
+unsigned Process::getPid() {
+    return this->id;
+}
+
 unsigned Process::getBatch() {
     return this->batch;
 }

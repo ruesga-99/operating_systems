@@ -1,3 +1,6 @@
+#ifndef PROCESS_HPP
+#define PROCESS_HPP
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -21,6 +24,7 @@ class Process {
 
         // Getters 
         std::string getName();
+        unsigned getPid();
         unsigned getMaxT();
         unsigned getElapsedT();
         unsigned getRemainingT();
@@ -45,3 +49,5 @@ class Process {
 
         void updateTime();
 };
+
+#endif
