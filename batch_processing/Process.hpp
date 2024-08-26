@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 
 class Process {
     private: 
@@ -48,6 +49,8 @@ class Process {
         std::string information();
 
         void updateTime();
+
+        std::vector<std::string> vectorizeTask();
 };
 
 #endif

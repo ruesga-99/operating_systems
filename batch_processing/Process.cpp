@@ -65,3 +65,16 @@ void Process::updateTime() {
     this->remainingT--;
     this->elapsedT++;
 }
+
+vector<string> Process::vectorizeTask() {
+    vector<string> result;
+
+    result.push_back(to_string(id));            // Process id
+    result.push_back("Name"+name);              // Name
+    result.push_back(opName);                   // Operation
+    result.push_back(to_string(maxT));          // Max Expected Time
+    result.push_back(to_string(elapsedT));      // Elapsed Time
+    result.push_back(to_string(remainingT));    // Remaining Time
+
+    return result;
+}

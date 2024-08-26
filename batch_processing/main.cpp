@@ -105,3 +105,12 @@ int main () {
 
     return 0;
 }  
+
+/*
+    // Initialize Interface with dummy data
+    vector<string> currentTask; // Can be filled with task names or IDs if available
+    Interface i(tasks, currentTask, completed);
+
+    // Call showInterface() to check its output
+    cout << i.showInterface() << endl;
+*/
