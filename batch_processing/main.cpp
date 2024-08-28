@@ -10,22 +10,37 @@
 
 using namespace std;
 
-float randomFloat() {
-    default_random_engine generator(chrono::system_clock::now().time_since_epoch().count());
-	uniform_real_distribution<float> distribution(0.00, 50.00);
-	auto randomFloat = bind(distribution, generator);
-
-    return randomFloat();
+// Validation functions
+bool isUnique(int id, vector<Process> &temp) {
+    for (int i(0); i < temp.size(); i++) {
+        if (id == temp[i].getPid()) {
+            return false;
+        }
+    }
 }
 
-int randomInt() {
+bool isInteger(float num) {
+    return floor(num) == num;
+}
+
+bool isValid(float t) {
+    if (t <= 0 || !isInteger(t)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+// Random number generator
+int randomInt(int a, int b) {
     default_random_engine generator(chrono::system_clock::now().time_since_epoch().count());
-	uniform_int_distribution<int> distribution(1, 5);
+	uniform_int_distribution<int> distribution(a, b);
 	auto randomInt = bind(distribution, generator);
 
     return randomInt();
 }
 
+// Batches related functions
 Process fillProcess (unsigned batch) {
     string name;
     unsigned id, maxT, op;
@@ -38,9 +53,9 @@ Process fillProcess (unsigned batch) {
     cout << "Max Expected Time: ";
     cin >> maxT;
 
-    a = randomFloat();
-    b = randomFloat();
-    op = randomInt();
+    a = randomInt(-100, 100);
+    b = randomInt(-100, 100);
+    op = randomInt(1, 5);
 
     Process temp(name, id, maxT, op, batch, a, b);
 

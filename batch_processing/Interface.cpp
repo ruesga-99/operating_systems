@@ -9,8 +9,11 @@ Interface::Interface(vector<Process> batchContent, vector<string> currentTask, v
 }
 
 int Interface::calculateTableHeight () {
-    return (max(batchContent.size(), completedTasks.size()) > MIN_HEIGHT) 
-            ? max(batchContent.size(), completedTasks.size()) : MIN_HEIGHT;
+    /*
+    return (max(batchContent.size(), completedTasks.size()) > currentTask.size()) 
+            ? max(batchContent.size(), completedTasks.size()) : currentTask.size(); */
+
+    return max(batchContent.size(), completedTasks.size(), currentTask.size());
 }
 
 string Interface::formatString (string s, int length) {
@@ -36,7 +39,7 @@ string Interface::showInterface () {
     
     fullInterface << showHeaders();
 
-    /*
+    
     // Filling table content
     for (int i(0); i < tableHeight; i++) {
         fullInterface << formatString(batchContent[i].getName(), 25) << " | ";
@@ -49,7 +52,7 @@ string Interface::showInterface () {
         fullInterface << formatString(to_string(completedTasks[i].getResult()), 15) << " | ";
         fullInterface << formatString(to_string(completedTasks[i].getBatch()), 8) << "\n";
     }
-    */
+    
     
     for (int i(0); i < tableHeight; i++) {
         fullInterface << formatString(".", 25) << " | ";

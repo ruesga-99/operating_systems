@@ -8,8 +8,6 @@
 
 #include "Process.hpp"
 
-#define MIN_HEIGHT 6
-
 class Interface {
     private:
         std::vector<Process> batchContent, completedTasks;
