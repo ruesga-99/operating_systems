@@ -5,7 +5,7 @@ Process::Process() {
 
 }
 
-Process::Process (string name, unsigned id, unsigned maxT, unsigned op, unsigned batch, float a, float b) 
+Process::Process (string name, unsigned id, unsigned maxT, unsigned op, unsigned batch, int a, int b) 
     : name(name), id(id), maxT(maxT), op(op), batch(batch), a(a), b(b), remainingT(maxT), elapsedT(0) {
 
 }
@@ -24,6 +24,22 @@ unsigned Process::getBatch() {
 
 unsigned Process::getRemainingT() {
     return this->remainingT;
+}
+
+int Process::calculateResult(int a, int b) {
+    if (op == 1) {
+        return a+b;
+    } else if (op == 2) {
+        return a-b;
+    } else if (op == 3) {
+        return a*b;
+    } else if (op == 4) {
+        return a/b;
+    } else if (op == 5) {
+        return a%b;
+    } else {
+        return 0;
+    }
 }
 
 char Process::defineOperator() {
@@ -61,6 +77,17 @@ string Process::information() {
     return info.str();
 }
 
+string Process::completedInfo(){
+    stringstream details;
+
+    details << "PID: " << id << endl;
+    details << "Operation: " << a << " " << defineOperator() << " " << b << endl;
+    details << "Result: " << calculateResult(a, b) << endl;
+    details << "Batch N.: " << batch << endl;
+
+    return details.str(); 
+}
+
 void Process::updateTime() {
     this->remainingT--;
     this->elapsedT++;
@@ -69,12 +96,12 @@ void Process::updateTime() {
 vector<string> Process::vectorizeTask() {
     vector<string> result;
 
-    result.push_back(to_string(id));            // Process id
-    result.push_back("Name"+name);              // Name
-    result.push_back(opName);                   // Operation
-    result.push_back(to_string(maxT));          // Max Expected Time
-    result.push_back(to_string(elapsedT));      // Elapsed Time
-    result.push_back(to_string(remainingT));    // Remaining Time
+    result.push_back("PID" + to_string(id));                        // Process id
+    result.push_back("Name: " + name);                              // Name
+    result.push_back("Operation: " + opName);                       // Operation
+    result.push_back("Max Time: " + to_string(maxT));               // Max Expected Time
+    result.push_back("Elapsed Time: " + to_string(elapsedT));       // Elapsed Time
+    result.push_back("Remaining Time: " + to_string(remainingT));   // Remaining Time
 
     return result;
 }

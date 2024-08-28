@@ -9,19 +9,18 @@
 class Process {
     private: 
         unsigned id, maxT, elapsedT, remainingT, batch, op;
-        float a, b, result;
+        int a, b, result;
         std::string name, opName;
         bool completed;
 
         // Class methods
-        float calculateResult();
-        
+        int calculateResult(int, int);
 
         char defineOperator();
 
     public:
         Process ();
-        Process (std::string, unsigned, unsigned, unsigned, unsigned, float, float);
+        Process (std::string, unsigned, unsigned, unsigned, unsigned, int, int);
 
         // Getters 
         std::string getName();
@@ -41,12 +40,13 @@ class Process {
         void setElapsedTime(unsigned);
         void setRemainingTime(unsigned);
         void setBatch(unsigned);
-        void setA(float);
-        void setB(float);
+        void setA(int);
+        void setB(int);
 
         // Class Methods
         std::string toString();
         std::string information();
+        std::string completedInfo();
 
         void updateTime();
 
