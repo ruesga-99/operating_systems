@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#define TICK 500
+
 // Validation functions
 bool isUnique(int id, vector<Process> &temp) {
     for (int i(0); i < temp.size(); i++) {
@@ -17,6 +19,7 @@ bool isUnique(int id, vector<Process> &temp) {
             return false;
         }
     }
+    return true;
 }
 
 bool isInteger(float num) {
@@ -83,7 +86,6 @@ vector<Process> generateBatches () {
 
 void executeProcess (Process &temp) {
     temp.updateTime();
-    cout << temp.toString();
 }
 
 int main () {
@@ -91,41 +93,57 @@ int main () {
     vector<Process> tasks = generateBatches();
     vector<Process> completed, current;
 
-    int pendingBatches = tasks.size() / 5;
+    int pendingBatches(tasks.size()/5), remainingTasks(tasks.size());
+    int count(0), batch(0), timeKepper(0);
 
-    while (pendingBatches > 0) {
-        
-        int batch(0), count(0);
-        for (int i(0); i < tasks.size(); i++) {    
-            cout << tasks[i].information() << endl;
+    if (tasks.size() % 5 != 0) {
+        pendingBatches += 1;
+    }
 
-            while (tasks[i].getRemainingT() > 0) {
-                executeProcess(tasks[i]);
-            }
+    system("cls");
+    while (remainingTasks > 0) {
+        // Update the batch number each 5 iteartions
+        if (count % 5 == 0) {
+            batch ++;
+            pendingBatches --;
 
-            count ++;
-            if (count % 5 == 0) {
-                batch ++;
-                cout << "SE PASA AL SIGUIENTE LOTE" << endl;
-                cout << "Pending Batches: " << pendingBatches << "\n\n";
-                pendingBatches--;
-                /*
-                    - Limpiar Pantalla
-                    - Imprimir de Nuevo
-                */
+            current.clear();
+            for (int i(count); i < count+5; i++) {
+                if (i >= tasks.size()) {
+                    break;
+                }
+                current.push_back(tasks[i]);
             }
         }
+
+        Sleep(TICK);
+        system("cls");
+        Interface intf1(current, tasks[count].vectorizeTask(), completed, pendingBatches, timeKepper, batch);
+        cout << intf1.showInterface();
+        current.erase(current.begin());
+
+        while (tasks[count].getRemainingT() > 0) {
+            executeProcess(tasks[count]);
+            timeKepper ++;
+            Sleep(TICK);
+            system("cls");
+            Interface intf(current, tasks[count].vectorizeTask(), completed, pendingBatches, timeKepper, batch);
+            cout << intf.showInterface();
+        }
+        completed.push_back(tasks[count]);
+
+        count ++;
+        remainingTasks--;
+
+        Sleep(TICK);
+        system("cls");
+        Interface intf(current, tasks[count].vectorizeTask(), completed, pendingBatches, timeKepper, batch);
+        cout << intf.showInterface();
     }
-    cout << "Pending Batches: " << pendingBatches << "\n\n";
+
+    string pause;
+    cout << "\nPresione enter para terminar ...";
+    getline(cin, pause);
 
     return 0;
 }  
-
-/*
-    // Initialize Interface with dummy data
-    vector<string> currentTask; // Can be filled with task names or IDs if available
-    Interface i(tasks, currentTask, completed);
-
-    // Call showInterface() to check its output
-    cout << i.showInterface() << endl;
-*/

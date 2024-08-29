@@ -12,7 +12,7 @@ class Interface {
     private:
         std::vector<Process> batchContent, completedTasks;
         std::vector<std::string> currentTask;
-        int currentBatch, remainingBatches, elapsedTime;
+        int batchCount, remainingBatches, elapsedTime;
         int tableHeight;
 
         int calculateTableHeight();
@@ -23,7 +23,7 @@ class Interface {
 
     public:
         Interface();
-        Interface(std::vector<Process>, std::vector<std::string>, std::vector<Process>);
+        Interface(std::vector<Process>, std::vector<std::string>, std::vector<Process>, int, int, int);
 
         std::string showInterface();
 };

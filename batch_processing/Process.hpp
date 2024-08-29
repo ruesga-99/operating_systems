@@ -10,8 +10,7 @@ class Process {
     private: 
         unsigned id, maxT, elapsedT, remainingT, batch, op;
         int a, b, result;
-        std::string name, opName;
-        bool completed;
+        std::string name;
 
         // Class methods
         int calculateResult(int, int);
@@ -29,10 +28,9 @@ class Process {
         unsigned getElapsedT();
         unsigned getRemainingT();
         unsigned getBatch();
-        unsigned getOp();
-        float getA();
-        float getB();
-        float getResult();
+        int getResult();
+
+        std::string getOp();
 
         // Setters
         void setName(std::string);

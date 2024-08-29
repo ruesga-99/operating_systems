@@ -22,8 +22,28 @@ unsigned Process::getBatch() {
     return this->batch;
 }
 
+unsigned Process::getMaxT() {
+    return this->maxT;
+}
+
 unsigned Process::getRemainingT() {
     return this->remainingT;
+}
+
+unsigned Process::getElapsedT() {
+    return this->elapsedT;
+}
+
+int Process::getResult() {
+    return calculateResult(a, b);
+}
+
+string Process::getOp() {
+    stringstream operation;
+
+    operation << a << " " << defineOperator() << " " << b;
+
+    return operation.str();
 }
 
 int Process::calculateResult(int a, int b) {
@@ -98,7 +118,8 @@ vector<string> Process::vectorizeTask() {
 
     result.push_back("PID" + to_string(id));                        // Process id
     result.push_back("Name: " + name);                              // Name
-    result.push_back("Operation: " + opName);                       // Operation
+    result.push_back("Operation: " + to_string(a) + " " +           // Operation
+                    defineOperator() + " " + to_string(b));                       
     result.push_back("Max Time: " + to_string(maxT));               // Max Expected Time
     result.push_back("Elapsed Time: " + to_string(elapsedT));       // Elapsed Time
     result.push_back("Remaining Time: " + to_string(remainingT));   // Remaining Time
