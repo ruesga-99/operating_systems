@@ -87,7 +87,7 @@ string Interface::showHeaders () {
     haeder << formatString("CURRENT BATCH: " + to_string(batchCount), 41) << " | " << formatString("TASK INFORMATION", 31) << " | " 
            << formatString("COMPLETED TASKS", 51) << "\n";
     haeder << "------------------------------------------+---------------------------------+---------------------------------------------------------------- \n";
-    haeder << formatString("NAME", 25) << " | " << formatString("MAX TIME", 13) << " | " << formatString("PID: " /*+ currentTask[0]*/, 31)
+    haeder << formatString("NAME", 25) << " | " << formatString("MAX TIME", 13) << " | " << formatString("PID: " + currentTask[0], 31)
            << " | " << formatString("PID", 5) << " | "<< formatString("OPERATION", 25) << " | " << formatString("RESULT", 15) << " | " 
            << formatString("BATCH #", 8) << "\n";
     haeder << "--------------------------+---------------+---------------------------------+-------+---------------------------+-----------------+---------- \n";

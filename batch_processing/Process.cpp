@@ -116,7 +116,7 @@ void Process::updateTime() {
 vector<string> Process::vectorizeTask() {
     vector<string> result;
 
-    result.push_back("PID" + to_string(id));                        // Process id
+    result.push_back(to_string(id));                                // Process id
     result.push_back("Name: " + name);                              // Name
     result.push_back("Operation: " + to_string(a) + " " +           // Operation
                     defineOperator() + " " + to_string(b));                       
