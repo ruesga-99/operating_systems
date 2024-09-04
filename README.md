@@ -5,6 +5,7 @@ This repository contains various programs that simulate request management using
 
 <dl>
   <dd> &nbsp&nbsp 🚧 Batch Processing </dd>
+  <dd> &nbsp&nbsp 🚧 Mutiprogramming </dd>
 </dl>
 
 ## Emoji Key
