@@ -61,7 +61,7 @@ string Interface::showInterface () {
         if (i < completedTasks.size()) {
             fullInterface << formatString(to_string(completedTasks[i].getPid()), 5) << " | ";
             fullInterface << formatString(completedTasks[i].getOperator(), 25) << " | ";
-            fullInterface << formatString(to_string(completedTasks[i].getResult()), 15) << " | ";
+            fullInterface << formatString(completedTasks[i].getResult(), 15) << " | ";
             fullInterface << formatString(to_string(completedTasks[i].getBatch()), 8) << "\n";
         } else {
             // Fill table with empty spaces

@@ -24,24 +24,21 @@ int randomInt(int a, int b) {
 }
 
 int checkKey(int i,Process p,vector<Process> &temp,vector<Process> &temp2){
-    char key,key2;
+    char key;
     if(_kbhit()){
         key=_getch();
         if(key=='e'){
             temp[i].setRemainingTime(0);
-            return 1;
         }
         else if(key=='p'){
             system("pause");
-            do{
+            while(key!='c'){
                 if(_kbhit()){
-                    key2=_getch();
+                    key=_getch();
                 }
-            }while(key2!='c');
-
+            }
         }
         else if(key=='i'){
-            //p.setMaxT(p.getRemainingT());
             temp2.push_back(p);
             return 2;
         }
@@ -95,7 +92,6 @@ void executeProcess (Process &temp) {
 }
 
 int main () {
-
     vector<Process> tasks = generateBatches();
     vector<Process> completed, current;
 
@@ -141,16 +137,20 @@ int main () {
             }
             */
             executeProcess(tasks[count]);
-            if (checkKey(count,tasks[count],tasks,current)==2){
-                count--;
+            if(checkKey(count,tasks[count],tasks,current)==2){
+                tasks[count].setProcessed(false);
+                break;
             }
+
             timeKepper ++;
             Sleep(TICK);
             system("cls");
             Interface intf(current, tasks[count].vectorizeTask(), completed, pendingBatches, timeKepper, batch);
             cout << intf.showInterface();
         }
-        completed.push_back(tasks[count]);
+        if(tasks[count].getProcessed()==true){
+            completed.push_back(tasks[count]);
+        }
 
         count ++;
         remainingTasks--;

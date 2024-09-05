@@ -1,0 +1,32 @@
+# depslib dependency file v1.0
+1725509633 source:c:\users\miche\desktop\operating_systems\multiprogramming\main.cpp
+	<iostream>
+	<vector>
+	<chrono>
+	<random>
+	<thread>
+	<functional>
+	<windows.h>
+	<conio.h>
+	"Process.hpp"
+	"Interface.hpp"
+
+1725509633 c:\users\miche\desktop\operating_systems\multiprogramming\process.hpp
+	<iostream>
+	<string>
+	<sstream>
+	<vector>
+
+1725457170 c:\users\miche\desktop\operating_systems\multiprogramming\interface.hpp
+	<iostream>
+	<string>
+	<sstream>
+	<vector>
+	"Process.hpp"
+
+1725499503 source:c:\users\miche\desktop\operating_systems\multiprogramming\interface.cpp
+	"Interface.hpp"
+
+1725509633 source:c:\users\miche\desktop\operating_systems\multiprogramming\process.cpp
+	"Process.hpp"
+

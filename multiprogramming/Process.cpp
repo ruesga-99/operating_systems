@@ -34,6 +34,10 @@ int Process::getOpt() {
     return this->op;
 }
 
+bool Process::getProcessed() {
+    return this->processed;
+}
+
 int Process::getA() {
     return this->a;
 }
@@ -42,8 +46,8 @@ int Process::getB() {
     return this->b;
 }
 
-int Process::getResult() {
-    return calculateResult(a, b);
+string Process::getResult() {
+    return to_string(calculateResult(a, b));
 }
 
 string Process::getOperator() {
@@ -60,6 +64,10 @@ void Process::setMaxT(unsigned m){
 
 void Process::setRemainingTime(unsigned r){
     this->remainingT=r;
+}
+
+void Process::setResult(string re){
+    this->result=re;
 }
 
 int Process::calculateResult(int a, int b) {
@@ -92,6 +100,10 @@ char Process::defineOperator() {
     } else {
         return ' ';
     }
+}
+
+void Process::setProcessed(bool p){
+    this->processed=p;
 }
 
 string Process::toString() {
