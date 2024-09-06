@@ -29,7 +29,7 @@ string Interface::formatString (string s, int length) {
     return s;
 }
 
-string Interface::showInterface () {
+string Interface::showInterface (int remainingT) {
     tableHeight = calculateTableHeight();
 
     stringstream fullInterface;
@@ -41,20 +41,22 @@ string Interface::showInterface () {
     for (int i(0); i < tableHeight; i++) {
         // Vector 1: batchContent
         if (i < batchContent.size()) {
-            fullInterface << formatString(to_string(batchContent[i].getPid()),25)  << " | ";
+            fullInterface << formatString(to_string(batchContent[i].getPid()),13)  << " | ";
             fullInterface << formatString(to_string(batchContent[i].getMaxT()), 13) << " | ";
+            fullInterface << formatString(to_string(remainingT), 14) << " | ";
         } else {
             // Fill table with empty spaces
-            fullInterface << formatString("", 25) << " | ";
             fullInterface << formatString("", 13) << " | ";
+            fullInterface << formatString("", 13) << " | ";
+            fullInterface << formatString("", 14) << " | ";
         }
 
         // Vector 2: currentTask
         if (i + 1 < currentTask.size()) {
-            fullInterface << formatString(currentTask[i + 1], 31) << " | ";
+            fullInterface << formatString(currentTask[i + 1], 28) << " | ";
         } else {
             // Fill table with empty spaces
-            fullInterface << formatString("", 31) << " | ";
+            fullInterface << formatString("", 28) << " | ";
         }
 
         // Vector 3: completedTasks
@@ -72,7 +74,7 @@ string Interface::showInterface () {
         }
     }
 
-    fullInterface << "--------------------------+---------------+---------------------------------+-------+---------------------------+-----------------+----------" << endl;
+    fullInterface << "--------------+---------------+----------------+------------------------------+-------+---------------------------+-----------------+--------" << endl;
 
     fullInterface << "\nPENDING BATCHES: " << remainingBatches << endl;
     fullInterface << "TIME KEEPER: " << elapsedTime << " sec " << endl;
@@ -83,14 +85,14 @@ string Interface::showInterface () {
 string Interface::showHeaders () {
     stringstream haeder;
 
-    haeder << "------------------------------------------+---------------------------------+---------------------------------------------------------------- \n";
-    haeder << formatString("CURRENT BATCH: " + to_string(batchCount), 41) << " | " << formatString("TASK INFORMATION", 31) << " | "
+    haeder << "-----------------------------------------------+------------------------------+-------------------------------------------------------------- \n";
+    haeder << formatString("CURRENT BATCH: " + to_string(batchCount), 46) << " | " << formatString("TASK INFORMATION", 28) << " | "
            << formatString("COMPLETED TASKS", 51) << "\n";
-    haeder << "------------------------------------------+---------------------------------+---------------------------------------------------------------- \n";
-    haeder << formatString("PID", 25) << " | " << formatString("MAX TIME", 13) << " | " << formatString("PID: " + currentTask[0], 31)
+    haeder << "-----------------------------------------------+------------------------------+-------------------------------------------------------------- \n";
+    haeder << formatString("PID", 13) << " | " << formatString("MAX TIME", 13) << " | " << formatString("REMAINING TIME", 14) << " | "<<formatString("PID: " + currentTask[0], 28)
            << " | " << formatString("PID", 5) << " | "<< formatString("OPERATION", 25) << " | " << formatString("RESULT", 15) << " | "
            << formatString("BATCH #", 8) << "\n";
-    haeder << "--------------------------+---------------+---------------------------------+-------+---------------------------+-----------------+---------- \n";
+    haeder << "------------------------------+----------------+------------------------------+-------+---------------------------+-----------------+------- \n";
 
     return haeder.str();
 }

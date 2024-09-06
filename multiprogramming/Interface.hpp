@@ -25,7 +25,7 @@ class Interface {
         Interface();
         Interface(std::vector<Process>, std::vector<std::string>, std::vector<Process>, int, int, int);
 
-        std::string showInterface();
+        std::string showInterface(int);
 };
 
 #endif

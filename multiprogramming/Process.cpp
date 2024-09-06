@@ -135,9 +135,10 @@ string Process::completedInfo(){
     return details.str();
 }
 
-void Process::updateTime() {
+int Process::updateTime() {
     this->remainingT--;
     this->elapsedT++;
+    return remainingT;
 }
 
 vector<string> Process::vectorizeTask() {

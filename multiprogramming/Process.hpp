@@ -51,7 +51,7 @@ class Process {
         std::string information();
         std::string completedInfo();
 
-        void updateTime();
+        int updateTime();
 
         std::vector<std::string> vectorizeTask();
 };

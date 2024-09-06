@@ -81,7 +81,7 @@ vector<Process> generateBatches () {
         tasks.push_back(temp);
         i++;
         j++;
-        //std::this_thread::sleep_for(std::chrono::seconds(5));
+        //std::this_thread::sleep_for(std::chrono::seconds(3));
     }
 
     return tasks;
@@ -96,7 +96,7 @@ int main () {
     vector<Process> completed, current;
 
     int pendingBatches(tasks.size()/5), remainingTasks(tasks.size());
-    int count(0), batch(0), timeKepper(0);
+    int count(0), batch(0), timeKepper(0),it(count);
 
     if (tasks.size() % 5 != 0) {
         pendingBatches += 1;
@@ -121,21 +121,11 @@ int main () {
         Sleep(TICK);
         system("cls");
         Interface intf1(current, tasks[count].vectorizeTask(), completed, pendingBatches, timeKepper, batch);
-        cout << intf1.showInterface();
+        cout << intf1.showInterface(tasks[it++].getRemainingT());
+
         current.erase(current.begin());
 
         while (tasks[count].getRemainingT() > 0) {
-            /*
-            char key;
-            if(_kbhit()){
-                key=_getch();
-                if(key=='i'){
-                    break;
-                    Process temporal(tasks[count].getPid(),tasks[count].getRemainingT(), tasks[count].getOpt(), tasks[count].getBatch(), tasks[count].getA(),tasks[count].getB());
-                    current.push_back(temporal);
-                }
-            }
-            */
             executeProcess(tasks[count]);
             if(checkKey(count,tasks[count],tasks,current)==2){
                 tasks[count].setProcessed(false);
@@ -146,7 +136,7 @@ int main () {
             Sleep(TICK);
             system("cls");
             Interface intf(current, tasks[count].vectorizeTask(), completed, pendingBatches, timeKepper, batch);
-            cout << intf.showInterface();
+            cout << intf.showInterface(tasks[count].getRemainingT());
         }
         if(tasks[count].getProcessed()==true){
             completed.push_back(tasks[count]);
@@ -158,7 +148,7 @@ int main () {
         Sleep(TICK);
         system("cls");
         Interface intf(current, tasks[count].vectorizeTask(), completed, pendingBatches, timeKepper, batch);
-        cout << intf.showInterface();
+        cout << intf.showInterface(tasks[count].getRemainingT());
     }
 
     string pause;
