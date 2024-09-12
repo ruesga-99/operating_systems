@@ -30,6 +30,21 @@ def toggle_pause(event):
     elif event.char.lower() == 'c':
         is_paused = False
 
+def interruption(event):
+    global current_batch
+    if event.char.lower() == 'i' and current_batch:
+        process = current_batch.pop(0)  # Remove the first process (in execution)
+        current_batch.append(process)  # Add it to the end of the current batch
+        update_tables()  # Update tables to reflect the new state
+
+def error(event):
+    global current_batch, completed_tasks
+    if event.char.lower() == 'e' and current_batch:
+        process = current_batch.pop(0)  # Remove the first process (in execution)
+        process.batch = batch_number
+        completed_tasks.append(process)  # Move it to the completed tasks list
+        update_tables()  # Update tables to reflect the new state
+
 def process_batch():
     global current_batch, completed_tasks, pending_tasks, batch_number
 
@@ -71,7 +86,10 @@ def update_tables():
         completed_tree.delete(row)
     for process in completed_tasks:
         process.solve()
-        completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result, process.batch))
+        if process.maxT != process.elapsedT:
+            completed_tree.insert("", tk.END, values=(process.pid, process.op, "## ERROR ##", process.batch))
+        elif process.maxT == process.elapsedT:
+            completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result, process.batch))
 
 def start_simulation():
     global pending_tasks, current_batch, simulation_started, batch_number
@@ -115,6 +133,8 @@ window.configure(bg="#252525")
 
 # Bind the keys P and C to toggle_pause function
 window.bind("<Key>", toggle_pause)
+window.bind("<Key-i>", interruption)
+window.bind("<Key-e>", error)     
 
 ''' Configuración de los frames 
 '''
