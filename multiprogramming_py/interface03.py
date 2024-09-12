@@ -56,20 +56,21 @@ def update_tables():
     # Update Current Batch Table
     for row in batch_tree.get_children():
         batch_tree.delete(row)
-    for process in current_batch[1:]:  # Exclude the first process since it's in the "In Process" table
+    for process in current_batch[1:]:
         batch_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT))
     
     # Update In Process Table
     for row in process_tree.get_children():
         process_tree.delete(row)
     if current_batch:
-        process = current_batch[0]  # Only show the first process in In Process
+        process = current_batch[0]
         process_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, process.remainingT, process.op))
     
     # Update Completed Tasks Table
     for row in completed_tree.get_children():
         completed_tree.delete(row)
     for process in completed_tasks:
+        process.solve()
         completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result, process.batch))
 
 def start_simulation():

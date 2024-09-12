@@ -34,9 +34,7 @@ class Process:
         self.elapsedT = 0
         self.remainingT = maxT
         self.batch = 0
-        self.a = 0
-        self.b = 0
-        self.op = ""
+        self.op = op
         self.result = ""
 
     # Class methods
