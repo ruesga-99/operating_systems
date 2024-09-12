@@ -1,9 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
+from Process import *
 
 # Global variables
 elapsed_time = 0
 is_paused = False
+batch_size = 5
+pending_tasks = []
+current_batch = []
+completed_tasks = []
+simulation_started = False 
 
 # This function will update the timer's label
 def update_time():
@@ -11,9 +17,10 @@ def update_time():
     if not is_paused:
         elapsed_time += 1
         time_keeper.config(text=f"Total Elapsed Time: {elapsed_time} s")
-    window.after(1000, update_time)  # Update each second, can be modified
+        process_batch()
+    window.after(1000, update_time)  # Update each second
 
-# Function to toggle pause and continue
+# Function to manage pause and continue functionallity
 def toggle_pause(event):
     global is_paused
     if event.char.lower() == 'p':
@@ -21,7 +28,66 @@ def toggle_pause(event):
     elif event.char.lower() == 'c':
         is_paused = False
 
-# Configuración de la ventana principal
+def process_batch():
+    global current_batch, completed_tasks
+    if current_batch:
+        process = current_batch[0]
+        process.update_time()
+        update_table()
+        if process.remainingT <= 0:
+            completed_tasks.append(current_batch.pop(0))
+            update_table()
+            if pending_tasks:
+                current_batch.append(pending_tasks.pop(0))
+            update_table()
+
+def update_table():
+    for row in batch_tree.get_children():
+        batch_tree.delete(row)
+    for process in current_batch:
+        batch_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT))
+
+def update_completed_table():
+    for row in completed_tree.get_children():
+        completed_tree.delete(row)
+    for process in completed_tasks:
+        completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result, process.batch))
+
+def start_simulation():
+    global pending_tasks, current_batch, simulation_started
+    
+    if simulation_started:
+        return  # Exit the function if the simulation has already started
+    
+    # Get the number of tasks from the input field
+    try:
+        num_tasks = int(task_entry.get())
+        if num_tasks <= 0:
+            raise ValueError("Number of tasks must be greater than 0.")
+    except ValueError as e:
+        print(f"Invalid input: {e}")
+        return
+
+    # Generate processes
+    pending_tasks = generate_processes(num_tasks)
+    current_batch = pending_tasks[:batch_size]
+    pending_tasks = pending_tasks[batch_size:]
+    
+    # Update tables
+    update_table()
+
+    # Disable the start button and entry field after the first use
+    start_button.config(state=tk.DISABLED)
+    task_entry.config(state=tk.DISABLED)
+    
+    # Set the flag to true
+    simulation_started = True
+    
+    # Start the timer
+    update_time()
+
+''' Configuración de la ventana principal
+'''
 window = tk.Tk()
 window.title("Operating Systems: Multiprogramming")
 window.geometry("1200x600")
@@ -87,8 +153,13 @@ tk.Label(control_frame, text="Remaining Batches: ", bg="#373737", fg="white").gr
 time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")
 time_keeper.grid(row=2, column=0, padx=10, pady=5, sticky="w")
 tk.Label(control_frame, text="Total Tasks: ", bg="#373737", fg="white").grid(row=3, column=0, padx=10, pady=5, sticky="w")
-tk.Entry(control_frame, width=15).grid(row=3, column=1, padx=5, pady=5)
-tk.Button(control_frame, text="Start", bg="#46548e", fg="white", relief="flat", overrelief="flat").grid(row=3, column=2, padx=10, pady=5)
+
+# Change task_entry and start_button to global variables
+task_entry = tk.Entry(control_frame, width=15)
+task_entry.grid(row=3, column=1, padx=5, pady=5)
+
+start_button = tk.Button(control_frame, text="Start", bg="#46548e", fg="white", relief="flat", overrelief="flat", command=start_simulation)
+start_button.grid(row=3, column=2, padx=10, pady=5)
 
 # Expandir las columnas y filas
 window.grid_rowconfigure(0, weight=1)
@@ -102,9 +173,6 @@ process_frame.grid_rowconfigure(1, weight=1)
 process_frame.grid_columnconfigure(0, weight=1)
 completed_frame.grid_rowconfigure(1, weight=1)
 completed_frame.grid_columnconfigure(0, weight=1)
-
-# Update time
-update_time()
 
 # Main loop
 window.mainloop()
