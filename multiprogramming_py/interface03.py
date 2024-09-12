@@ -10,6 +10,7 @@ pending_tasks = []
 current_batch = []
 completed_tasks = []
 simulation_started = False 
+batch_number = 1  # Inicia la numeración de lotes en 1
 
 # This function will update the timer's label
 def update_time():
@@ -18,9 +19,10 @@ def update_time():
         elapsed_time += 1
         time_keeper.config(text=f"Total Elapsed Time: {elapsed_time} s")
         process_batch()
-    window.after(1000, update_time)  # Update each second
+    if pending_tasks or current_batch:
+        window.after(1000, update_time)  # Update each second
 
-# Function to manage pause and continue functionallity
+# Function to manage pause and continue functionality
 def toggle_pause(event):
     global is_paused
     if event.char.lower() == 'p':
@@ -29,32 +31,49 @@ def toggle_pause(event):
         is_paused = False
 
 def process_batch():
-    global current_batch, completed_tasks
-    if current_batch:
-        process = current_batch[0]
-        process.update_time()
-        update_table()
-        if process.remainingT <= 0:
-            completed_tasks.append(current_batch.pop(0))
-            update_table()
-            if pending_tasks:
-                current_batch.append(pending_tasks.pop(0))
-            update_table()
+    global current_batch, completed_tasks, pending_tasks, batch_number
 
-def update_table():
+    # If there are processes in the current batch
+    if current_batch:
+        process = current_batch[0]  # Get the first process
+        process.update_time()  # Update its elapsed time
+        update_tables()
+
+        # If the process is completed
+        if process.remainingT <= 0:
+            process.batch = batch_number  # Asigna el número de lote al proceso completado
+            completed_tasks.append(current_batch.pop(0))  # Move it to completed tasks
+            update_tables()
+            
+            if not current_batch and pending_tasks:  # If the batch is empty and there are pending tasks
+                # Load the next set of processes into the current batch
+                current_batch = pending_tasks[:batch_size]
+                pending_tasks = pending_tasks[batch_size:]
+                batch_number += 1  # Incrementa el número de lote
+                update_tables()
+
+def update_tables():
+    # Update Current Batch Table
     for row in batch_tree.get_children():
         batch_tree.delete(row)
-    for process in current_batch:
+    for process in current_batch[1:]:  # Exclude the first process since it's in the "In Process" table
         batch_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT))
-
-def update_completed_table():
+    
+    # Update In Process Table
+    for row in process_tree.get_children():
+        process_tree.delete(row)
+    if current_batch:
+        process = current_batch[0]  # Only show the first process in In Process
+        process_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, process.remainingT, process.op))
+    
+    # Update Completed Tasks Table
     for row in completed_tree.get_children():
         completed_tree.delete(row)
     for process in completed_tasks:
         completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result, process.batch))
 
 def start_simulation():
-    global pending_tasks, current_batch, simulation_started
+    global pending_tasks, current_batch, simulation_started, batch_number
     
     if simulation_started:
         return  # Exit the function if the simulation has already started
@@ -74,7 +93,7 @@ def start_simulation():
     pending_tasks = pending_tasks[batch_size:]
     
     # Update tables
-    update_table()
+    update_tables()
 
     # Disable the start button and entry field after the first use
     start_button.config(state=tk.DISABLED)
