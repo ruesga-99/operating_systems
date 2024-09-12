@@ -1,6 +1,16 @@
 import tkinter as tk
 from tkinter import ttk
 
+# Global variables
+elapsed_time = 0
+
+# This function will update the timer's label
+def update_time():
+    global elapsed_time
+    elapsed_time += 1
+    time_keeper.config(text=f"Total Elapsed Time: {elapsed_time} s")
+    window.after(1000, update_time)  # Update each second, can be moddified
+
 # Configuración de la ventana principal
 window = tk.Tk()
 window.title("Operating Systems: Multiprogramming")
@@ -61,7 +71,8 @@ completed_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 '''
 tk.Label(control_frame, text="P - Pause  :::  C - Continue  :::  I - Interruption  :::  E- Error", bg="#373737", fg="white").grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
 tk.Label(control_frame, text="Remaining Batches: ", bg="#373737", fg="white").grid(row=1, column=0, padx=10, pady=5, sticky="w")
-tk.Label(control_frame, text="Total Elapsed Time: ", bg="#373737", fg="white").grid(row=2, column=0, padx=10, pady=5, sticky="w")
+time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")
+time_keeper.grid(row=2, column=0, padx=10, pady=5, sticky="w")
 tk.Label(control_frame, text="Total Tasks: ", bg="#373737", fg="white").grid(row=3, column=0, padx=10, pady=5, sticky="w")
 tk.Entry(control_frame, width=15).grid(row=3, column=1, padx=5, pady=5)
 tk.Button(control_frame, text="Start", bg="#46548e", fg="white", relief="flat", overrelief="flat").grid(row=3, column=2, padx=10, pady=5)
@@ -78,6 +89,9 @@ process_frame.grid_rowconfigure(1, weight=1)
 process_frame.grid_columnconfigure(0, weight=1)
 completed_frame.grid_rowconfigure(1, weight=1)
 completed_frame.grid_columnconfigure(0, weight=1)
+
+# Update time
+update_time()
 
 # Main loop
 window.mainloop()
