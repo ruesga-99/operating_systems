@@ -43,3 +43,11 @@ class Process:
     def update_time(self):
         self.elapsedT += 1
         self.remainingT -= 1
+
+    def solve(self):
+        try:
+            self.result = str(eval(self.op))
+        except ZeroDivisionError:
+            self.result = "Error (div by 0)"
+        except Exception as e:
+            self.result = f"Error ({str(e)})"

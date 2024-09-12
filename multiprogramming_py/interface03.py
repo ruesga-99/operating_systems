@@ -135,8 +135,8 @@ tk.Label(batch_frame, text="Current Batch", bg="#373737", fg="white").grid(row=0
 
 batch_tree = ttk.Treeview(batch_frame, columns=('ID', 'MT', 'ET'), show='headings', height=10)
 batch_tree.heading('ID', text='ID')
-batch_tree.heading('MT', text='Max T')
-batch_tree.heading('ET', text='Elapsed T')
+batch_tree.heading('MT', text='Max Time')
+batch_tree.heading('ET', text='Elapsed Time')
 
 batch_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
@@ -146,9 +146,9 @@ tk.Label(process_frame, text="Task In Process", bg="#373737", fg="white").grid(r
 
 process_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'RT', 'OP'), show='headings', height=10)
 process_tree.heading('ID', text='ID')
-process_tree.heading('MT', text='Max T')
-process_tree.heading('ET', text='Elapsed T')
-process_tree.heading('RT', text='Remaining T')
+process_tree.heading('MT', text='Max Time')
+process_tree.heading('ET', text='Elapsed Time')
+process_tree.heading('RT', text='Remaining Time')
 process_tree.heading('OP', text='Operation')
 
 process_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
