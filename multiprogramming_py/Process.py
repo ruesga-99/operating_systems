@@ -1,58 +1,45 @@
+import random
+import time
+
+def generate_processes (n):
+    processes = []
+
+    for i in range (1, n+1):
+        max_time = random.randint(1, 10)
+        process = Process(i, max_time, generate_operation())
+        processes.append(process)
+
+    return processes
+
+def generate_operation ():
+    operator = random.randint(1, 5)
+    a, b, c = random.randint(-100, 100), random.randint(-100, 100), random.randint(1, 100)
+
+    if operator == 1:       # SUM
+        operation = str(a) + "+" + str(b)
+    elif operator == 2:     # SUB
+        operation = str(a) + "-" + str(b)
+    elif operator == 3:     # MUL
+        operation = str(a) + "*" + str(b)
+    elif operator == 4:     # DIV
+        operation = str(a) + "/" + str(c)
+    elif operator == 5:     # MOD
+        operation = str(a) + "%" + str(c)
+    return operation
+
 class Process:
-    def __init__(self, pid=0, maxT=0, elapsedT=0, batch=0, a=0, b=0):
+    def __init__(self, pid=0, maxT=0, op=""):
         self.pid = pid
         self.maxT = maxT
-        self.elapsedT = elapsedT
-        self.remainingT = maxT - elapsedT
-        self.batch = batch
-        self.a = a
-        self.b = b
+        self.elapsedT = 0
+        self.remainingT = maxT
+        self.batch = 0
+        self.a = 0
+        self.b = 0
         self.op = ""
         self.result = ""
-
-    # Class getters
-    def get_pid(self):
-        return self.id
-
-    def get_maxT(self):
-        return self.maxT
-
-    def get_elapsedT(self):
-        return self.elapsedT
-
-    def get_remainingT(self):
-        return self.remainingT
-
-    def get_batch(self):
-        return self.batch
-
-    def get_result(self):
-        return self.result
-
-    def get_op(self):
-        return self.op
-    
-    # Class Setters
-    def set_maxT(self, maxT):
-        self.maxT = maxT
-        self.remainingT = maxT - self.elapsedT
-
-    def set_elapsedT(self, elapsedT):
-        self.elapsedT = elapsedT
-        self.remainingT = self.maxT - elapsedT
-
-    def set_batch(self, batch):
-        self.batch = batch
-
-    def set_a(self, a):
-        self.a = a
-        self.result = self.calculate_result(self.a, self.b)
-
-    def set_b(self, b):
-        self.b = b
-        self.result = self.calculate_result(self.a, self.b)
 
     # Class methods
     def update_time(self):
         self.elapsedT += 1
-        self.remainingT = self.maxT - self.elapsedT
+        self.remainingT -= 1

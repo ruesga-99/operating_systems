@@ -3,19 +3,32 @@ from tkinter import ttk
 
 # Global variables
 elapsed_time = 0
+is_paused = False
 
 # This function will update the timer's label
 def update_time():
     global elapsed_time
-    elapsed_time += 1
-    time_keeper.config(text=f"Total Elapsed Time: {elapsed_time} s")
-    window.after(1000, update_time)  # Update each second, can be moddified
+    if not is_paused:
+        elapsed_time += 1
+        time_keeper.config(text=f"Total Elapsed Time: {elapsed_time} s")
+    window.after(1000, update_time)  # Update each second, can be modified
+
+# Function to toggle pause and continue
+def toggle_pause(event):
+    global is_paused
+    if event.char.lower() == 'p':
+        is_paused = True
+    elif event.char.lower() == 'c':
+        is_paused = False
 
 # Configuración de la ventana principal
 window = tk.Tk()
 window.title("Operating Systems: Multiprogramming")
 window.geometry("1200x600")
 window.configure(bg="#252525")
+
+# Bind the keys P and C to toggle_pause function
+window.bind("<Key>", toggle_pause)
 
 ''' Configuración de los frames 
 '''
