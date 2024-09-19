@@ -32,14 +32,14 @@ def toggle_pause(event):
 
 def interruption(event):
     global current_batch
-    if event.char.lower() == 'i' and current_batch:
+    if event.char.lower() == 'i' and current_batch and is_paused == False:
         process = current_batch.pop(0)  # Remove the first process (in execution)
         current_batch.append(process)  # Add it to the end of the current batch
         update_tables()  # Update tables to reflect the new state
 
 def error(event):
     global current_batch, completed_tasks
-    if event.char.lower() == 'e' and current_batch:
+    if event.char.lower() == 'e' and current_batch and is_paused == False:
         process = current_batch.pop(0)  # Remove the first process (in execution)
         process.batch = batch_number
         completed_tasks.append(process)  # Move it to the completed tasks list
@@ -188,7 +188,7 @@ completed_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
 ''' Configuración del área de control 
 '''
-tk.Label(control_frame, text="P - Pause  :::  C - Continue  :::  I - Interruption  :::  E- Error", bg="#373737", fg="white").grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
+tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E- Error  :::", bg="#373737", fg="white").grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
 tk.Label(control_frame, text="Remaining Batches: ", bg="#373737", fg="white").grid(row=1, column=0, padx=10, pady=5, sticky="w")
 time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")
 time_keeper.grid(row=2, column=0, padx=10, pady=5, sticky="w")
