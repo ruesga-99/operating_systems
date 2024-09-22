@@ -69,10 +69,10 @@ def process_batch():
 
 def update_tables():
     # Update Current Batch Table
-    for row in batch_tree.get_children():
-        batch_tree.delete(row)
+    for row in ready_tree.get_children():
+        ready_tree.delete(row)
     for process in current_batch[1:]:
-        batch_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT))
+        ready_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT))
     
     # Update In Process Table
     for row in process_tree.get_children():
@@ -138,8 +138,8 @@ window.bind("<Key-e>", error)
 
 ''' Configuración de los frames 
 '''
-batch_frame = tk.Frame(window, bg="#373737")
-batch_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+ready_frame = tk.Frame(window, bg="#373737")
+ready_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
 
 process_frame = tk.Frame(window, bg="#373737")
 process_frame.grid(row=0, column=1, pady=5, sticky="nsew")
@@ -152,18 +152,18 @@ control_frame.grid(row=1, column=0, columnspan=3, padx=5, pady=(0,5), sticky="ns
 
 ''' Configuración de la tabla de Current Batch 
 '''
-tk.Label(batch_frame, text="Current Batch", bg="#373737", fg="white").grid(row=0, column=0, sticky="ew")
+tk.Label(ready_frame, text=":::  Ready  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, sticky="ew")
 
-batch_tree = ttk.Treeview(batch_frame, columns=('ID', 'MT', 'ET'), show='headings', height=10)
-batch_tree.heading('ID', text='ID')
-batch_tree.heading('MT', text='Max Time')
-batch_tree.heading('ET', text='Elapsed Time')
+ready_tree = ttk.Treeview(ready_frame, columns=('ID', 'MT', 'ET'), show='headings', height=10)
+ready_tree.heading('ID', text='ID')
+ready_tree.heading('MT', text='Max Time')
+ready_tree.heading('ET', text='Elapsed Time')
 
-batch_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
+ready_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
 ''' Configuración de la tabla de In Process 
 '''
-tk.Label(process_frame, text="Task In Process", bg="#373737", fg="white").grid(row=0, sticky="new")
+tk.Label(process_frame, text=":::  Task In Process  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
 
 process_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'RT', 'OP'), show='headings', height=10)
 process_tree.heading('ID', text='ID')
@@ -174,9 +174,21 @@ process_tree.heading('OP', text='Operation')
 
 process_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
+''' Configuración de la tabla Blocked
+'''
+tk.Label(process_frame, text=":::  Blocked Tasks  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=2, sticky="new")
+
+blocked_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'SRT'), show='headings', height=10)
+blocked_tree.heading('ID', text='ID')
+blocked_tree.heading('MT', text='Max Time')
+blocked_tree.heading('ET', text='Elapsed Time')
+blocked_tree.heading('SRT', text='Suspended Remaining Time')
+
+blocked_tree.grid(row=3, padx=5, pady=5, sticky="nsew")
+
 ''' Configuración de la tabla de Completed 
 '''
-tk.Label(completed_frame, text="Completed Tasks", bg="#373737", fg="white").grid(row=0, sticky="new")
+tk.Label(completed_frame, text=":::  Completed Tasks  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
 
 completed_tree = ttk.Treeview(completed_frame, columns=('ID', 'OP', 'RES', 'BN'), show='headings', height=10)
 completed_tree.heading('ID', text='ID')
@@ -188,7 +200,7 @@ completed_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
 ''' Configuración del área de control 
 '''
-tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E- Error  :::", bg="#373737", fg="white").grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
+tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
 tk.Label(control_frame, text="Remaining Batches: ", bg="#373737", fg="white").grid(row=1, column=0, padx=10, pady=5, sticky="w")
 time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")
 time_keeper.grid(row=2, column=0, padx=10, pady=5, sticky="w")
@@ -207,8 +219,8 @@ window.grid_columnconfigure(0, weight=1)
 window.grid_columnconfigure(1, weight=1)
 window.grid_columnconfigure(2, weight=1)
 
-batch_frame.grid_rowconfigure(1, weight=1)
-batch_frame.grid_columnconfigure(0, weight=1)
+ready_frame.grid_rowconfigure(1, weight=1)
+ready_frame.grid_columnconfigure(0, weight=1)
 process_frame.grid_rowconfigure(1, weight=1)
 process_frame.grid_columnconfigure(0, weight=1)
 completed_frame.grid_rowconfigure(1, weight=1)
