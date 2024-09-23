@@ -5,12 +5,11 @@ from Process import *
 # Global variables
 elapsed_time = 0
 is_paused = False
-batch_size = 5
+memory_size = 5
 pending_tasks = []
-current_batch = []
+main_memory = []
 completed_tasks = []
 simulation_started = False 
-batch_number = 1  # Inicia la numeración de lotes en 1
 
 # This function will update the timer's label
 def update_time():
@@ -19,8 +18,13 @@ def update_time():
         elapsed_time += 1
         time_keeper.config(text=f"Total Elapsed Time: {elapsed_time} s")
         process_batch()
-    if pending_tasks or current_batch:
+    if pending_tasks or main_memory:
         window.after(1000, update_time)  # Update each second
+
+# This function will udpate the remaining tasks label
+def update_remaining_tasks():
+    global pending_tasks, main_memory
+    remaining_tasks.config(text=f"Remaining Tasks: {len(pending_tasks) + len(main_memory)}")
 
 # Function to manage pause and continue functionality
 def toggle_pause(event):
@@ -30,55 +34,55 @@ def toggle_pause(event):
     elif event.char.lower() == 'c':
         is_paused = False
 
+# Function to manage interruption events
 def interruption(event):
-    global current_batch
-    if event.char.lower() == 'i' and current_batch and is_paused == False:
-        process = current_batch.pop(0)  # Remove the first process (in execution)
-        current_batch.append(process)  # Add it to the end of the current batch
+    global main_memory
+    if event.char.lower() == 'i' and main_memory and is_paused == False:
+        process = main_memory.pop(0)  # Remove the first process (in execution)
+        main_memory.append(process)  # Add it to the end of the in-ready list
         update_tables()  # Update tables to reflect the new state
 
+# Function to manage error events
 def error(event):
-    global current_batch, completed_tasks
-    if event.char.lower() == 'e' and current_batch and is_paused == False:
-        process = current_batch.pop(0)  # Remove the first process (in execution)
-        process.batch = batch_number
+    global main_memory, completed_tasks
+    if event.char.lower() == 'e' and main_memory and is_paused == False:
+        process = main_memory.pop(0)  # Remove the first process (in execution)
         completed_tasks.append(process)  # Move it to the completed tasks list
+        if pending_tasks:
+            main_memory.append(pending_tasks.pop(0))
+        update_remaining_tasks()
         update_tables()  # Update tables to reflect the new state
 
 def process_batch():
-    global current_batch, completed_tasks, pending_tasks, batch_number
+    global main_memory, completed_tasks, pending_tasks
 
-    # If there are processes in the current batch
-    if current_batch:
-        process = current_batch[0]  # Get the first process
+    # If there are loaded processes in memory
+    if main_memory:
+        process = main_memory[0]  # Get the first process
         process.update_time()  # Update its elapsed time
         update_tables()
 
         # If the process is completed
         if process.remainingT <= 0:
-            process.batch = batch_number  # Asigna el número de lote al proceso completado
-            completed_tasks.append(current_batch.pop(0))  # Move it to completed tasks
-            update_tables()
+            completed_tasks.append(main_memory.pop(0))  # Move it to completed tasks
             
-            if not current_batch and pending_tasks:  # If the batch is empty and there are pending tasks
-                # Load the next set of processes into the current batch
-                current_batch = pending_tasks[:batch_size]
-                pending_tasks = pending_tasks[batch_size:]
-                batch_number += 1  # Incrementa el número de lote
-                update_tables()
+            if pending_tasks:  # If there are pending tasks
+                main_memory.append(pending_tasks.pop(0))
+            update_remaining_tasks()
+            update_tables()
 
 def update_tables():
-    # Update Current Batch Table
+    # Update Ready Table
     for row in ready_tree.get_children():
         ready_tree.delete(row)
-    for process in current_batch[1:]:
+    for process in main_memory[1:]:
         ready_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT))
     
     # Update In Process Table
     for row in process_tree.get_children():
         process_tree.delete(row)
-    if current_batch:
-        process = current_batch[0]
+    if main_memory:
+        process = main_memory[0]
         process_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, process.remainingT, process.op))
     
     # Update Completed Tasks Table
@@ -87,12 +91,12 @@ def update_tables():
     for process in completed_tasks:
         process.solve()
         if process.maxT != process.elapsedT:
-            completed_tree.insert("", tk.END, values=(process.pid, process.op, "## ERROR ##", process.batch))
+            completed_tree.insert("", tk.END, values=(process.pid, process.op, "## ERROR ##"))
         elif process.maxT == process.elapsedT:
-            completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result, process.batch))
+            completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result))
 
 def start_simulation():
-    global pending_tasks, current_batch, simulation_started, batch_number
+    global pending_tasks, main_memory, simulation_started
     
     if simulation_started:
         return  # Exit the function if the simulation has already started
@@ -108,8 +112,9 @@ def start_simulation():
 
     # Generate processes
     pending_tasks = generate_processes(num_tasks)
-    current_batch = pending_tasks[:batch_size]
-    pending_tasks = pending_tasks[batch_size:]
+    update_remaining_tasks()
+    main_memory = pending_tasks[:memory_size]
+    pending_tasks = pending_tasks[memory_size:]
     
     # Update tables
     update_tables()
@@ -124,10 +129,10 @@ def start_simulation():
     # Start the timer
     update_time()
 
-''' Configuración de la ventana principal
+''' Main Window General Configuration
 '''
 window = tk.Tk()
-window.title("Operating Systems: Multiprogramming")
+window.title("Operating Systems: First In First Served")
 window.geometry("1200x600")
 window.configure(bg="#252525")
 
@@ -136,7 +141,7 @@ window.bind("<Key>", toggle_pause)
 window.bind("<Key-i>", interruption)
 window.bind("<Key-e>", error)     
 
-''' Configuración de los frames 
+''' Frames General Configuration
 '''
 ready_frame = tk.Frame(window, bg="#373737")
 ready_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
@@ -150,7 +155,7 @@ completed_frame.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
 control_frame = tk.Frame(window, bg="#373737")
 control_frame.grid(row=1, column=0, columnspan=3, padx=5, pady=(0,5), sticky="nsew")
 
-''' Configuración de la tabla de Current Batch 
+''' In-Ready Tasks' Panel Configuration
 '''
 tk.Label(ready_frame, text=":::  Ready  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, sticky="ew")
 
@@ -161,7 +166,7 @@ ready_tree.heading('ET', text='Elapsed Time')
 
 ready_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
-''' Configuración de la tabla de In Process 
+''' In Process Panel Configuration
 '''
 tk.Label(process_frame, text=":::  Task In Process  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
 
@@ -174,7 +179,7 @@ process_tree.heading('OP', text='Operation')
 
 process_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
-''' Configuración de la tabla Blocked
+''' Blocked Task's Panel Configuration
 '''
 tk.Label(process_frame, text=":::  Blocked Tasks  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=2, sticky="new")
 
@@ -186,22 +191,22 @@ blocked_tree.heading('SRT', text='Suspended Remaining Time')
 
 blocked_tree.grid(row=3, padx=5, pady=5, sticky="nsew")
 
-''' Configuración de la tabla de Completed 
+''' Completed Tasks' Panel Configuration
 '''
 tk.Label(completed_frame, text=":::  Completed Tasks  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
 
-completed_tree = ttk.Treeview(completed_frame, columns=('ID', 'OP', 'RES', 'BN'), show='headings', height=10)
+completed_tree = ttk.Treeview(completed_frame, columns=('ID', 'OP', 'RES'), show='headings', height=10)
 completed_tree.heading('ID', text='ID')
 completed_tree.heading('OP', text='Operation')
 completed_tree.heading('RES', text='Result')
-completed_tree.heading('BN', text='Batch No.')
 
 completed_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
-''' Configuración del área de control 
+''' Control Panel Configuration
 '''
 tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
-tk.Label(control_frame, text="Remaining Batches: ", bg="#373737", fg="white").grid(row=1, column=0, padx=10, pady=5, sticky="w")
+remaining_tasks = tk.Label(control_frame, text="Remaining Tasks: ", bg="#373737", fg="white")
+remaining_tasks.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")
 time_keeper.grid(row=2, column=0, padx=10, pady=5, sticky="w")
 tk.Label(control_frame, text="Total Tasks: ", bg="#373737", fg="white").grid(row=3, column=0, padx=10, pady=5, sticky="w")
@@ -213,7 +218,7 @@ task_entry.grid(row=3, column=1, padx=5, pady=5)
 start_button = tk.Button(control_frame, text="Start", bg="#46548e", fg="white", relief="flat", overrelief="flat", command=start_simulation)
 start_button.grid(row=3, column=2, padx=10, pady=5)
 
-# Expandir las columnas y filas
+# Expand rows and columns
 window.grid_rowconfigure(0, weight=1)
 window.grid_columnconfigure(0, weight=1)
 window.grid_columnconfigure(1, weight=1)

@@ -33,7 +33,6 @@ class Process:
         self.maxT = maxT
         self.elapsedT = 0
         self.remainingT = maxT
-        self.batch = 0
         self.op = op
         self.result = ""
 
