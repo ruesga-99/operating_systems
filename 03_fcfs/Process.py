@@ -36,6 +36,8 @@ class Process:
         self.op = op
         self.result = ""
 
+        self.blockedT = 0
+
     # Class methods
     def update_time(self):
         self.elapsedT += 1

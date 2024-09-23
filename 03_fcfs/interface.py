@@ -9,17 +9,25 @@ memory_size = 5
 pending_tasks = []
 main_memory = []
 completed_tasks = []
+blocked_tasks = []
 simulation_started = False 
 
 # This function will update the timer's label
 def update_time():
-    global elapsed_time
+    global elapsed_time, blocked_tasks
     if not is_paused:
         elapsed_time += 1
         time_keeper.config(text=f"Total Elapsed Time: {elapsed_time} s")
-        process_batch()
-    if pending_tasks or main_memory:
+        process_memory()
+
+        # Update blocked processes if existent
+        if blocked_tasks:
+            for process in blocked_tasks:
+                process.blockedT -= 1
+
+    if pending_tasks or main_memory or blocked_tasks:
         window.after(1000, update_time)  # Update each second
+        update_tables()
 
 # This function will udpate the remaining tasks label
 def update_remaining_tasks():
@@ -39,7 +47,8 @@ def interruption(event):
     global main_memory
     if event.char.lower() == 'i' and main_memory and is_paused == False:
         process = main_memory.pop(0)  # Remove the first process (in execution)
-        main_memory.append(process)  # Add it to the end of the in-ready list
+        process.blockedT = 7
+        blocked_tasks.append(process)  # Add it to the end of the in-ready list
         update_tables()  # Update tables to reflect the new state
 
 # Function to manage error events
@@ -53,7 +62,7 @@ def error(event):
         update_remaining_tasks()
         update_tables()  # Update tables to reflect the new state
 
-def process_batch():
+def process_memory():
     global main_memory, completed_tasks, pending_tasks
 
     # If there are loaded processes in memory
@@ -85,6 +94,16 @@ def update_tables():
         process = main_memory[0]
         process_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, process.remainingT, process.op))
     
+    # Update Blocked Process Table
+    for row in blocked_tree.get_children():
+        blocked_tree.delete(row)
+    for process in blocked_tasks:
+        if process.blockedT >= 0:
+            blocked_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, process.blockedT))
+        else: 
+            main_memory.append(process)
+            blocked_tasks.remove(process)
+
     # Update Completed Tasks Table
     for row in completed_tree.get_children():
         completed_tree.delete(row)
@@ -183,11 +202,11 @@ process_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 '''
 tk.Label(process_frame, text=":::  Blocked Tasks  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=2, sticky="new")
 
-blocked_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'SRT'), show='headings', height=10)
+blocked_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'BRT'), show='headings', height=10)
 blocked_tree.heading('ID', text='ID')
 blocked_tree.heading('MT', text='Max Time')
 blocked_tree.heading('ET', text='Elapsed Time')
-blocked_tree.heading('SRT', text='Suspended Remaining Time')
+blocked_tree.heading('BRT', text='Blocked Remaining Time')
 
 blocked_tree.grid(row=3, padx=5, pady=5, sticky="nsew")
 
