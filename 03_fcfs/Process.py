@@ -38,6 +38,15 @@ class Process:
 
         self.blockedT = 0
 
+        # PCB elements
+        self.arrive = -1
+        self.response = -1
+        self.finalization = -1
+        self.ret = -1
+        self.service = -1
+        self.wait = -1
+        # llegada, respuesta, finalización, retorno, servicio, espera
+
     # Class methods
     def update_time(self):
         self.elapsedT += 1
@@ -50,3 +59,14 @@ class Process:
             self.result = "Error (div by 0)"
         except Exception as e:
             self.result = f"Error ({str(e)})"
+
+    def get_PCB_string(self):
+        PCB = f"Process ID: {self.pid} \n"
+        PCB += f"Hora de llegada: {self.arrive} \n"
+        PCB += f"Tiempo de finalizacion: {self.finalization} \n"
+        PCB += f"Tiempo de servicio: {self.service} \n"
+        PCB += f"Tiempo de respuesta: {self.response} \n"
+        PCB += f"Tiempo de retorno: {self.ret} \n"
+        PCB += f"Tiempo de espera: {self.wait} \n"
+
+        return PCB

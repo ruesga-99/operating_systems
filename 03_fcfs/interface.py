@@ -28,6 +28,9 @@ def update_time():
     if pending_tasks or main_memory or blocked_tasks:
         window.after(1000, update_time)  # Update each second
         update_tables()
+    else:
+        # When the program has finished its execution the report is generated
+        PCB_report(completed_tasks)
 
 # This function will udpate the remaining tasks label
 def update_remaining_tasks():
@@ -57,10 +60,37 @@ def error(event):
     if event.char.lower() == 'e' and main_memory and is_paused == False:
         process = main_memory.pop(0)  # Remove the first process (in execution)
         completed_tasks.append(process)  # Move it to the completed tasks list
+        # BCP Completition
+        process.service = process.elapsedT                  # Save the service time
+        process.finalization = elapsed_time                 # Save finalization time
+        process.ret = process.finalization - process.arrive # Calculate and save return time
+        process.wait = process.ret - process.service        # Calculate and save wait time
+
         if pending_tasks:
-            main_memory.append(pending_tasks.pop(0))
+            new_task = pending_tasks.pop(0)
+            if new_task.arrive == -1:
+                    new_task.arrive = elapsed_time
+            main_memory.append(new_task)
+            
         update_remaining_tasks()
         update_tables()  # Update tables to reflect the new state
+
+# Generate PCB report
+def PCB_report(completed_tasks = []):
+    f = open("03_fcfs/FCFS_PCB_report.txt", "w") # relative to this repository's structure
+
+    f.write(" - - - - - - - - - - FCFS REPORT - - - - - - - - - -\n")
+    f.write("\n")
+
+    for task in completed_tasks:
+        f.write(f"Process ID: {task.pid} \n")
+        f.write(f"Hora de llegada: {task.arrive} \n")
+        f.write(f"Tiempo de finalizacion: {task.finalization} \n")
+        f.write(f"Tiempo de servicio: {task.service} \n")
+        f.write(f"Tiempo de respuesta: {task.response} \n")
+        f.write(f"Tiempo de retorno: {task.ret} \n")
+        f.write(f"Tiempo de espera: {task.wait} \n")
+        f.write("\n")
 
 def process_memory():
     global main_memory, completed_tasks, pending_tasks
@@ -68,15 +98,27 @@ def process_memory():
     # If there are loaded processes in memory
     if main_memory:
         process = main_memory[0]  # Get the first process
+        if process.response == -1:
+            process.response = elapsed_time - process.arrive
         process.update_time()  # Update its elapsed time
         update_tables()
 
         # If the process is completed
         if process.remainingT <= 0:
+            # BCP Completition
+            process.service = process.elapsedT                  # Save the service time
+            process.finalization = elapsed_time                 # Save finalization time
+            process.ret = process.finalization - process.arrive # Calculate and save return time
+            process.wait = process.ret - process.service        # Calculate and save wait time
+
             completed_tasks.append(main_memory.pop(0))  # Move it to completed tasks
             
             if pending_tasks:  # If there are pending tasks
-                main_memory.append(pending_tasks.pop(0))
+                process = pending_tasks.pop(0)
+                # Save arrival time to the memory
+                if process.arrive == -1:
+                    process.arrive = elapsed_time
+                main_memory.append(process)
             update_remaining_tasks()
             update_tables()
 
@@ -133,6 +175,8 @@ def start_simulation():
     pending_tasks = generate_processes(num_tasks)
     update_remaining_tasks()
     main_memory = pending_tasks[:memory_size]
+    for task in main_memory:
+        task.arrive = elapsed_time
     pending_tasks = pending_tasks[memory_size:]
     
     # Update tables
@@ -151,7 +195,7 @@ def start_simulation():
 ''' Main Window General Configuration
 '''
 window = tk.Tk()
-window.title("Operating Systems: First In First Served")
+window.title("Operating Systems: First Come First Served")
 window.geometry("1200x600")
 window.configure(bg="#252525")
 
