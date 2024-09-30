@@ -18,3 +18,13 @@ This repository contains various programs that simulate request management using
 🚧 (Under Construction): This emoji indicates tasks that have been implemented but still need further improvements or adjustments. There is already a corresponding file within the repository but hasn't been fully developed.
 
 💡 (Planning Ongoing): This emoji is used for sections that haven't been completely defined on their components. 
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ruesga-99/operating_systems.git
+   
+2. Install dependencies:
+   ```bash
+   pip install tkinter
