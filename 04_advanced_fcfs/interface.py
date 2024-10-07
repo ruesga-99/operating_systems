@@ -11,6 +11,7 @@ main_memory = []
 completed_tasks = []
 blocked_tasks = []
 simulation_started = False 
+num_tasks = 0
 
 # This function will update the timer's label
 def update_time():
@@ -69,15 +70,33 @@ def error(event):
         if pending_tasks:
             new_task = pending_tasks.pop(0)
             if new_task.arrive == -1:
-                    new_task.arrive = elapsed_time
+                new_task.arrive = elapsed_time
             main_memory.append(new_task)
             
         update_remaining_tasks()
         update_tables()  # Update tables to reflect the new state
 
+# Generate new process
+def new_process(event):
+    global main_memory, is_paused, pending_tasks, num_tasks
+    if event.char.lower() == 'n' and main_memory and is_paused == False:
+        num_tasks += 1
+        new_task = generate_processes(1)[0]
+        new_task.pid = num_tasks
+
+        if len(main_memory) < 5:
+            main_memory.append(new_task)
+        else: 
+            pending_tasks.append(new_task)
+
+        if new_task.arrive == -1:
+            new_task.arrive = elapsed_time
+
+        update_remaining_tasks()
+
 # Generate PCB report
 def PCB_report(completed_tasks = []):
-    f = open("03_fcfs/FCFS_PCB_report.txt", "w") # relative to this repository's structure
+    f = open("04_advanced_fcfs/FCFS_PCB_report.txt", "w") # relative to this repository's structure
 
     f.write(" - - - - - - - - - - FCFS REPORT - - - - - - - - - -\n")
     f.write("\n")
@@ -157,7 +176,7 @@ def update_tables():
             completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result))
 
 def start_simulation():
-    global pending_tasks, main_memory, simulation_started
+    global pending_tasks, main_memory, simulation_started, num_tasks
     
     if simulation_started:
         return  # Exit the function if the simulation has already started
@@ -202,7 +221,9 @@ window.configure(bg="#252525")
 # Bind the keys P and C to toggle_pause function
 window.bind("<Key>", toggle_pause)
 window.bind("<Key-i>", interruption)
-window.bind("<Key-e>", error)     
+window.bind("<Key-e>", error)  
+window.bind("<Key-n>", new_process)
+window.bind("<Key-b>", PCB_report)   
 
 ''' Frames General Configuration
 '''
@@ -267,7 +288,7 @@ completed_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
 ''' Control Panel Configuration
 '''
-tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
+tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::  N - New Process  :::  B - BCP Status  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
 remaining_tasks = tk.Label(control_frame, text="Remaining Tasks: ", bg="#373737", fg="white")
 remaining_tasks.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")

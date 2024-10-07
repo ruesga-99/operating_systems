@@ -1,0 +1,106 @@
+ - - - - - - - - - - FCFS REPORT - - - - - - - - - -
+
+Process ID: 1 
+Hora de llegada: 0 
+Tiempo de finalizacion: 6 
+Tiempo de servicio: 6 
+Tiempo de respuesta: 1 
+Tiempo de retorno: 6 
+Tiempo de espera: 0 
+
+Process ID: 4 
+Hora de llegada: 2 
+Tiempo de finalizacion: 12 
+Tiempo de servicio: 4 
+Tiempo de respuesta: 7 
+Tiempo de retorno: 10 
+Tiempo de espera: 6 
+
+Process ID: 8 
+Hora de llegada: 10 
+Tiempo de finalizacion: 22 
+Tiempo de servicio: 3 
+Tiempo de respuesta: 10 
+Tiempo de retorno: 12 
+Tiempo de espera: 9 
+
+Process ID: 9 
+Hora de llegada: 10 
+Tiempo de finalizacion: 23 
+Tiempo de servicio: 1 
+Tiempo de respuesta: 13 
+Tiempo de retorno: 13 
+Tiempo de espera: 12 
+
+Process ID: 2 
+Hora de llegada: 0 
+Tiempo de finalizacion: 25 
+Tiempo de servicio: 1 
+Tiempo de respuesta: 25 
+Tiempo de retorno: 25 
+Tiempo de espera: 24 
+
+Process ID: 3 
+Hora de llegada: 0 
+Tiempo de finalizacion: 26 
+Tiempo de servicio: 3 
+Tiempo de respuesta: 7 
+Tiempo de retorno: 26 
+Tiempo de espera: 23 
+
+Process ID: 10 
+Hora de llegada: 11 
+Tiempo de finalizacion: 29 
+Tiempo de servicio: 3 
+Tiempo de respuesta: 16 
+Tiempo de retorno: 18 
+Tiempo de espera: 15 
+
+Process ID: 11 
+Hora de llegada: 24 
+Tiempo de finalizacion: 33 
+Tiempo de servicio: 4 
+Tiempo de respuesta: 6 
+Tiempo de retorno: 9 
+Tiempo de espera: 5 
+
+Process ID: 7 
+Hora de llegada: 5 
+Tiempo de finalizacion: 41 
+Tiempo de servicio: 2 
+Tiempo de respuesta: 19 
+Tiempo de retorno: 36 
+Tiempo de espera: 34 
+
+Process ID: 13 
+Hora de llegada: 33 
+Tiempo de finalizacion: 48 
+Tiempo de servicio: 7 
+Tiempo de respuesta: 9 
+Tiempo de retorno: 15 
+Tiempo de espera: 8 
+
+Process ID: 5 
+Hora de llegada: 3 
+Tiempo de finalizacion: 49 
+Tiempo de servicio: 10 
+Tiempo de respuesta: 10 
+Tiempo de retorno: 46 
+Tiempo de espera: 36 
+
+Process ID: 6 
+Hora de llegada: 4 
+Tiempo de finalizacion: 54 
+Tiempo de servicio: 7 
+Tiempo de respuesta: 15 
+Tiempo de retorno: 50 
+Tiempo de espera: 43 
+
+Process ID: 12 
+Hora de llegada: 27 
+Tiempo de finalizacion: 56 
+Tiempo de servicio: 5 
+Tiempo de respuesta: 11 
+Tiempo de retorno: 29 
+Tiempo de espera: 24 
+
