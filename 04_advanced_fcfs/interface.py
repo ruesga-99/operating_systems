@@ -80,15 +80,17 @@ def error(event):
 # Generate new process
 def new_process(event):
     global main_memory, is_paused, pending_tasks, num_tasks, blocked_tasks
-    if event.char.lower() == 'n' and main_memory and is_paused == False:
+    if event.char.lower() == 'n' and (main_memory or blocked_tasks) and is_paused == False:
         num_tasks += 1
         new_task = generate_processes(1)[0]
         new_task.pid = num_tasks
 
-        if len(main_memory) < 5:
+        # If there's enough space on the main memory, add it directly there
+        if (len(main_memory) + len(blocked_tasks)) < 5:
             main_memory.append(new_task)
-        else: 
             new_task.arrive = elapsed_time
+        else: 
+        # If there's not, add it to the pending tasks' list
             pending_tasks.append(new_task)  
 
         update_remaining_tasks()
