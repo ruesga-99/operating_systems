@@ -52,6 +52,7 @@ def interruption(event):
     if event.char.lower() == 'i' and main_memory and is_paused == False:
         process = main_memory.pop(0)  # Remove the first process (in execution)
         process.blockedT = 7
+        process.status = "Blocked"
         blocked_tasks.append(process)  # Add it to the end of the in-ready list
         update_tables()  # Update tables to reflect the new state
 
@@ -66,12 +67,13 @@ def error(event):
         process.finalization = elapsed_time                 # Save finalization time
         process.ret = process.finalization - process.arrive # Calculate and save return time
         process.wait = process.ret - process.service        # Calculate and save wait time
-        process.status = "## ERROR ##"
+        process.status = "Completed: Error"
 
         if pending_tasks:
             new_task = pending_tasks.pop(0)
             if new_task.arrive == -1:
                 new_task.arrive = elapsed_time
+                new_task.status = "Ready"
             main_memory.append(new_task)
             
         update_remaining_tasks()
@@ -87,8 +89,9 @@ def new_process(event):
 
         # If there's enough space on the main memory, add it directly there
         if (len(main_memory) + len(blocked_tasks)) < 5:
-            main_memory.append(new_task)
             new_task.arrive = elapsed_time
+            new_task.status = "Ready"
+            main_memory.append(new_task)   
         else: 
         # If there's not, add it to the pending tasks' list
             pending_tasks.append(new_task)  
@@ -97,7 +100,7 @@ def new_process(event):
 
 # Review current PCB while in execution
 def view_PCB(event):
-    global main_memory, is_paused, completed_tasks
+    global main_memory, is_paused, completed_tasks, blocked_tasks
     if event.char.lower() == 't' and main_memory and not is_paused:
         is_paused = True
 
@@ -142,6 +145,10 @@ def view_PCB(event):
             PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
                                                 process.service, process.response, process.ret, 
                                                 process.wait))
+        for process in blocked_tasks:
+            PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
+                                                process.service, process.response, process.ret, 
+                                                process.wait))
 
 def process_memory():
     global main_memory, completed_tasks, pending_tasks
@@ -161,7 +168,7 @@ def process_memory():
             process.finalization = elapsed_time                 # Save finalization time
             process.ret = process.finalization - process.arrive # Calculate and save return time
             process.wait = process.ret - process.service        # Calculate and save wait time
-            process.status = "Completed"
+            process.status = "Completed: Success"
 
             completed_tasks.append(main_memory.pop(0))  # Move it to completed tasks
             
@@ -170,6 +177,7 @@ def process_memory():
                 # Save arrival time to the memory
                 if process.arrive == -1:
                     process.arrive = elapsed_time
+                    process.status = "Ready"
                 main_memory.append(process)
             update_remaining_tasks()
             update_tables()
@@ -186,6 +194,7 @@ def update_tables():
         process_tree.delete(row)
     if main_memory:
         process = main_memory[0]
+        process.status = "In-Process"
         process_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, process.remainingT, process.op))
     
     # Update Blocked Process Table
@@ -195,6 +204,7 @@ def update_tables():
         if process.blockedT >= 0:
             blocked_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, process.blockedT))
         else: 
+            process.status = "Ready"
             main_memory.append(process)
             blocked_tasks.remove(process)
 
