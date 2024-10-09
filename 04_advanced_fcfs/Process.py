@@ -47,6 +47,8 @@ class Process:
         self.wait = -1
         # llegada, respuesta, finalización, retorno, servicio, espera
 
+        self.status = "" # Control status: completed, ready, in-process, suspended
+
     # Class methods
     def update_time(self):
         self.elapsedT += 1

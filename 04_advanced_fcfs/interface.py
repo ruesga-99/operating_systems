@@ -31,7 +31,7 @@ def update_time():
         update_tables()
     else:
         # When the program has finished its execution the report is generated
-        PCB_report(completed_tasks)
+        view_PCB()
 
 # This function will udpate the remaining tasks label
 def update_remaining_tasks():
@@ -66,6 +66,7 @@ def error(event):
         process.finalization = elapsed_time                 # Save finalization time
         process.ret = process.finalization - process.arrive # Calculate and save return time
         process.wait = process.ret - process.service        # Calculate and save wait time
+        process.status = "## ERROR ##"
 
         if pending_tasks:
             new_task = pending_tasks.pop(0)
@@ -78,7 +79,7 @@ def error(event):
 
 # Generate new process
 def new_process(event):
-    global main_memory, is_paused, pending_tasks, num_tasks
+    global main_memory, is_paused, pending_tasks, num_tasks, blocked_tasks
     if event.char.lower() == 'n' and main_memory and is_paused == False:
         num_tasks += 1
         new_task = generate_processes(1)[0]
@@ -87,29 +88,58 @@ def new_process(event):
         if len(main_memory) < 5:
             main_memory.append(new_task)
         else: 
-            pending_tasks.append(new_task)
-
-        if new_task.arrive == -1:
             new_task.arrive = elapsed_time
+            pending_tasks.append(new_task)  
 
         update_remaining_tasks()
 
-# Generate PCB report
-def PCB_report(completed_tasks = []):
-    f = open("04_advanced_fcfs/FCFS_PCB_report.txt", "w") # relative to this repository's structure
+# Review current PCB while in execution
+def view_PCB(event):
+    global main_memory, is_paused, completed_tasks
+    if event.char.lower() == 't' and main_memory and not is_paused:
+        is_paused = True
 
-    f.write(" - - - - - - - - - - FCFS REPORT - - - - - - - - - -\n")
-    f.write("\n")
+        # Create a new window
+        PCB_window = tk.Toplevel(window)
+        PCB_window.title("Operating Systems: First Come First Served --- PCB")
+        PCB_window.geometry("1200x600")
+        PCB_window.configure(bg="#252525") 
 
-    for task in completed_tasks:
-        f.write(f"Process ID: {task.pid} \n")
-        f.write(f"Hora de llegada: {task.arrive} \n")
-        f.write(f"Tiempo de finalizacion: {task.finalization} \n")
-        f.write(f"Tiempo de servicio: {task.service} \n")
-        f.write(f"Tiempo de respuesta: {task.response} \n")
-        f.write(f"Tiempo de retorno: {task.ret} \n")
-        f.write(f"Tiempo de espera: {task.wait} \n")
-        f.write("\n")
+        # Main frame
+        main_frame = tk.Frame(PCB_window, bg="#373737")
+        main_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+
+        tk.Label(main_frame, text=":::  PCB Report  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
+
+        # Create table to show PCB results
+        PCB_tree = ttk.Treeview(main_frame, columns=('ID', 'Status', 'AT', 'FT', 'ST', 'ResT', 'RetT', 'WT'), show='headings', height=10)
+        PCB_tree.heading('ID', text='ID')
+        PCB_tree.heading('Status', text='Status')
+        PCB_tree.heading('AT', text='Arrival Time')
+        PCB_tree.heading('FT', text='Finalization Time')
+        PCB_tree.heading('ST', text='In-Service Time')
+        PCB_tree.heading('ResT', text='Response Time')
+        PCB_tree.heading('RetT', text='Return Time')
+        PCB_tree.heading('WT', text='Wait Time')
+
+        PCB_tree.grid(row=1,column=0, padx=5, pady=5, sticky="nsew")
+
+        # Expand rows and columns
+        PCB_window.grid_rowconfigure(0, weight=1)
+        PCB_window.grid_columnconfigure(0, weight=1)
+
+        main_frame.grid_rowconfigure(1, weight=1)
+        main_frame.grid_columnconfigure(0, weight=1)
+
+        # Fill PCB_report
+        for process in completed_tasks:
+            PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
+                                                process.service, process.response, process.ret, 
+                                                process.wait))
+        for process in main_memory:
+            PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
+                                                process.service, process.response, process.ret, 
+                                                process.wait))
 
 def process_memory():
     global main_memory, completed_tasks, pending_tasks
@@ -129,6 +159,7 @@ def process_memory():
             process.finalization = elapsed_time                 # Save finalization time
             process.ret = process.finalization - process.arrive # Calculate and save return time
             process.wait = process.ret - process.service        # Calculate and save wait time
+            process.status = "Completed"
 
             completed_tasks.append(main_memory.pop(0))  # Move it to completed tasks
             
@@ -223,7 +254,7 @@ window.bind("<Key>", toggle_pause)
 window.bind("<Key-i>", interruption)
 window.bind("<Key-e>", error)  
 window.bind("<Key-n>", new_process)
-window.bind("<Key-b>", PCB_report)   
+window.bind("<Key-t>", view_PCB)   
 
 ''' Frames General Configuration
 '''
@@ -288,7 +319,7 @@ completed_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
 ''' Control Panel Configuration
 '''
-tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::  N - New Process  :::  B - BCP Status  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
+tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::  N - New Process  :::  T - BCP Status  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
 remaining_tasks = tk.Label(control_frame, text="Remaining Tasks: ", bg="#373737", fg="white")
 remaining_tasks.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")
