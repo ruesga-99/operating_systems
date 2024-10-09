@@ -31,7 +31,7 @@ def update_time():
         update_tables()
     else:
         # When the program has finished its execution the report is generated
-        view_PCB()
+        generate_PCB()
 
 # This function will udpate the remaining tasks label
 def update_remaining_tasks():
@@ -100,55 +100,68 @@ def new_process(event):
 
 # Review current PCB while in execution
 def view_PCB(event):
-    global main_memory, is_paused, completed_tasks, blocked_tasks
-    if event.char.lower() == 't' and main_memory and not is_paused:
+    global main_memory, blocked_tasks, is_paused
+    if event.char.lower() == 't' and (main_memory or blocked_tasks) and not is_paused:
         is_paused = True
+        generate_PCB()
 
-        # Create a new window
-        PCB_window = tk.Toplevel(window)
-        PCB_window.title("Operating Systems: First Come First Served --- PCB")
-        PCB_window.geometry("1200x600")
-        PCB_window.configure(bg="#252525") 
+# Generate PCB report
+def generate_PCB():
+    global main_memory, completed_tasks, blocked_tasks, elapsed_time
 
-        # Main frame
-        main_frame = tk.Frame(PCB_window, bg="#373737")
-        main_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+    # Create a new window
+    PCB_window = tk.Toplevel(window)
+    PCB_window.title("Operating Systems: First Come First Served --- PCB")
+    PCB_window.geometry("1200x600")
+    PCB_window.configure(bg="#252525") 
 
-        tk.Label(main_frame, text=":::  PCB Report  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
+    # Main frame
+    main_frame = tk.Frame(PCB_window, bg="#373737")
+    main_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
 
-        # Create table to show PCB results
-        PCB_tree = ttk.Treeview(main_frame, columns=('ID', 'Status', 'AT', 'FT', 'ST', 'ResT', 'RetT', 'WT'), show='headings', height=10)
-        PCB_tree.heading('ID', text='ID')
-        PCB_tree.heading('Status', text='Status')
-        PCB_tree.heading('AT', text='Arrival Time')
-        PCB_tree.heading('FT', text='Finalization Time')
-        PCB_tree.heading('ST', text='In-Service Time')
-        PCB_tree.heading('ResT', text='Response Time')
-        PCB_tree.heading('RetT', text='Return Time')
-        PCB_tree.heading('WT', text='Wait Time')
+    tk.Label(main_frame, text=":::  PCB Report  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
 
-        PCB_tree.grid(row=1,column=0, padx=5, pady=5, sticky="nsew")
+    # Create table to show PCB results
+    PCB_tree = ttk.Treeview(main_frame, columns=('ID', 'Status', 'AT', 'FT', 'ST', 'ResT', 'RetT', 'WT'), show='headings', height=10)
+    PCB_tree.heading('ID', text='ID')
+    PCB_tree.heading('Status', text='Status')
+    PCB_tree.heading('AT', text='Arrival Time')
+    PCB_tree.heading('FT', text='Finalization Time')
+    PCB_tree.heading('ST', text='In-Service Time')
+    PCB_tree.heading('ResT', text='Response Time')
+    PCB_tree.heading('RetT', text='Return Time')
+    PCB_tree.heading('WT', text='Wait Time')
 
-        # Expand rows and columns
-        PCB_window.grid_rowconfigure(0, weight=1)
-        PCB_window.grid_columnconfigure(0, weight=1)
+    PCB_tree.grid(row=1,column=0, padx=5, pady=5, sticky="nsew")
 
-        main_frame.grid_rowconfigure(1, weight=1)
-        main_frame.grid_columnconfigure(0, weight=1)
+    # Expand rows and columns
+    PCB_window.grid_rowconfigure(0, weight=1)
+    PCB_window.grid_columnconfigure(0, weight=1)
 
-        # Fill PCB_report
-        for process in completed_tasks:
-            PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
-                                                process.service, process.response, process.ret, 
-                                                process.wait))
-        for process in main_memory:
-            PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
-                                                process.service, process.response, process.ret, 
-                                                process.wait))
-        for process in blocked_tasks:
-            PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
-                                                process.service, process.response, process.ret, 
-                                                process.wait))
+    main_frame.grid_rowconfigure(1, weight=1)
+    main_frame.grid_columnconfigure(0, weight=1)
+
+    # Fill PCB_report
+    for process in completed_tasks:
+        PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
+                                            process.service, process.response, process.ret, 
+                                            process.wait))
+    for process in main_memory:
+        # Calculate estimated times
+        ret = elapsed_time - process.arrive
+        wait = process.ret - process.service
+
+        PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
+                                            f"{process.elapsedT} *", process.response, f"{ret} *", 
+                                            f"{wait} *"))
+    for process in blocked_tasks:
+        # Calculate estimated times
+        ret = elapsed_time - process.arrive
+        wait = process.ret - process.service
+
+        PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
+                                            f"{process.elapsedT} *", process.response, f"{ret} *", 
+                                            f"{wait} *"))
 
 def process_memory():
     global main_memory, completed_tasks, pending_tasks
