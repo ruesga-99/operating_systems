@@ -7,7 +7,8 @@ This repository contains various programs that simulate request management using
   <dd> &nbsp&nbsp ✅ Batch Processing </dd>
   <dd> &nbsp&nbsp ✅ Batch Processing with Multiprogramming </dd>
   <dd> &nbsp&nbsp ✅ First Come First Served (FCFS) </dd>
-  <dd> &nbsp&nbsp 🚧 Advanced First Come First Served (FCFS) </dd>
+  <dd> &nbsp&nbsp ✅ Advanced First Come First Served (FCFS) </dd>
+  <dd> &nbsp&nbsp 💡 Producer-Consumer Algorithm </dd>
 </dl>
 
 ## Emoji Key
