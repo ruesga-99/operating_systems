@@ -134,6 +134,10 @@ def generate_PCB():
 
     PCB_tree.grid(row=1,column=0, padx=5, pady=5, sticky="nsew")
 
+    # Information labels
+    tk.Label(main_frame, text="\' *\' Indicates that the value might vary in the near future.", bg="#373737", fg="white").grid(row=2, column=0, padx=5, sticky="w")
+    tk.Label(main_frame, text="\'-1\' Indicates that the value cannot be calculated at this moment.", bg="#373737", fg="white").grid(row=3, column=0, padx=5, sticky="w")
+
     # Expand rows and columns
     PCB_window.grid_rowconfigure(0, weight=1)
     PCB_window.grid_columnconfigure(0, weight=1)
@@ -148,19 +152,17 @@ def generate_PCB():
                                             process.wait))
     for process in main_memory:
         # Calculate estimated times
-        ret = elapsed_time - process.arrive
-        wait = process.ret - process.service
+        wait = elapsed_time - process.arrive - process.elapsedT 
 
         PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
-                                            f"{process.elapsedT} *", process.response, f"{ret} *", 
+                                            f"{process.elapsedT} *", process.response, process.ret, 
                                             f"{wait} *"))
     for process in blocked_tasks:
         # Calculate estimated times
-        ret = elapsed_time - process.arrive
-        wait = process.ret - process.service
+        wait = elapsed_time - process.arrive - process.elapsedT
 
         PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
-                                            f"{process.elapsedT} *", process.response, f"{ret} *", 
+                                            f"{process.elapsedT} *", process.response, process.ret, 
                                             f"{wait} *"))
 
 def process_memory():
@@ -170,7 +172,10 @@ def process_memory():
     if main_memory:
         process = main_memory[0]  # Get the first process
         if process.response == -1:
-            process.response = elapsed_time - process.arrive
+            if process.pid == 1:
+                process.response = 0
+            else:
+                process.response = elapsed_time - process.arrive
         process.update_time()  # Update its elapsed time
         update_tables()
 
