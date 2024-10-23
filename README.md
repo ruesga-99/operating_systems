@@ -10,6 +10,7 @@ This repository contains various programs that simulate request management using
   <dd> &nbsp&nbsp ✅ Advanced First Come First Served (FCFS) </dd>
   <dd> &nbsp&nbsp 🚧 Producer-Consumer Algorithm </dd>
   <dd> &nbsp&nbsp 📆 Round Robin </dd>
+  <dd> &nbsp&nbsp 💡 Simple Paging </dd>
 </dl>
 
 ## Emoji Key
