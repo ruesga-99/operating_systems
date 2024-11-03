@@ -27,6 +27,9 @@ def update_time():
             for process in blocked_tasks:
                 process.blockedT -= 1
 
+        if main_memory:
+            main_memory[0].quantum_elapsed += 1
+
     if pending_tasks or main_memory or blocked_tasks:
         window.after(1000, update_time)  # Update each second
         update_tables()
@@ -54,6 +57,7 @@ def interruption(event):
         process = main_memory.pop(0)  # Remove the first process (in execution)
         process.blockedT = 7
         process.status = "Blocked"
+        process.quantum_elapsed = 0
         blocked_tasks.append(process)  # Add it to the end of the in-ready list
         update_tables()  # Update tables to reflect the new state
 
@@ -157,11 +161,11 @@ def generate_PCB():
         wait = elapsed_time - process.arrive - process.elapsedT 
 
         if process.status == "In-Process":
-            qrt = f"{main_memory[0].quantum_remaining}"
+            qet = f"{main_memory[0].quantum_elapsed}"
         else:
-            qrt = "---"
+            qet = "---"
 
-        PCB_tree.insert("", tk.END, values=(process.pid, process.status, qrt, process.arrive, process.finalization, 
+        PCB_tree.insert("", tk.END, values=(process.pid, process.status, qet, process.arrive, process.finalization, 
                                             f"{process.elapsedT} *", process.response, process.ret, 
                                             f"{wait} *"))
     for process in blocked_tasks:
@@ -173,7 +177,7 @@ def generate_PCB():
                                             f"{wait} *"))
 
 def process_memory():
-    global main_memory, completed_tasks, pending_tasks
+    global main_memory, completed_tasks, pending_tasks, quantum
 
     # If there are loaded processes in memory
     if main_memory:
@@ -185,6 +189,12 @@ def process_memory():
                 process.response = elapsed_time - process.arrive
         process.update_time()  # Update its elapsed time
         update_tables()
+
+        # If the process has completed its quantum
+        if process.quantum_elapsed == quantum:
+            main_memory[0].status = "Ready"
+            main_memory[0].quantum_elapsed = 0
+            main_memory.append(main_memory.pop(0))
 
         # If the process is completed
         if process.remainingT <= 0:
@@ -220,7 +230,8 @@ def update_tables():
     if main_memory:
         process = main_memory[0]
         process.status = "In-Process"
-        process_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, process.remainingT, process.op))
+        process_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, 
+                                                process.remainingT, process.quantum_elapsed, process.op))
     
     # Update Blocked Process Table
     for row in blocked_tree.get_children():
@@ -264,6 +275,7 @@ def start_simulation():
     main_memory = pending_tasks[:memory_size]
     for task in main_memory:
         task.arrive = elapsed_time
+        task.status = "Ready"
     pending_tasks = pending_tasks[memory_size:]
     
     # Update tables

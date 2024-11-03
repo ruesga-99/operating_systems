@@ -37,7 +37,7 @@ class Process:
         self.result = ""
 
         self.blockedT = 0
-        self.quantum_remaining = 0
+        self.quantum_elapsed = 0
 
         # PCB elements
         self.arrive = -1
