@@ -37,6 +37,7 @@ class Process:
         self.result = ""
 
         self.blockedT = 0
+        self.quantum_remaining = 0
 
         # PCB elements
         self.arrive = -1
@@ -45,7 +46,6 @@ class Process:
         self.ret = -1
         self.service = -1
         self.wait = -1
-        # llegada, respuesta, finalización, retorno, servicio, espera
 
         self.status = "" # Control status: completed, ready, in-process, suspended
 

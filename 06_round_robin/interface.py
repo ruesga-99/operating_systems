@@ -11,7 +11,8 @@ main_memory = []
 completed_tasks = []
 blocked_tasks = []
 simulation_started = False 
-num_tasks = 0
+num_tasks = 3
+quantum = 0
 
 # This function will update the timer's label
 def update_time():
@@ -101,7 +102,7 @@ def new_process(event):
 # Review current PCB while in execution
 def view_PCB(event):
     global main_memory, blocked_tasks, is_paused
-    if event.char.lower() == 't' and (main_memory or blocked_tasks) and not is_paused:
+    if event.char.lower() == 'b' and (main_memory or blocked_tasks) and not is_paused:
         is_paused = True
         generate_PCB()
 
@@ -122,9 +123,10 @@ def generate_PCB():
     tk.Label(main_frame, text=":::  PCB Report  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
 
     # Create table to show PCB results
-    PCB_tree = ttk.Treeview(main_frame, columns=('ID', 'Status', 'AT', 'FT', 'ST', 'ResT', 'RetT', 'WT'), show='headings', height=10)
+    PCB_tree = ttk.Treeview(main_frame, columns=('ID', 'STA', 'QET', 'AT', 'FT', 'ST', 'ResT', 'RetT', 'WT'), show='headings', height=10)
     PCB_tree.heading('ID', text='ID')
-    PCB_tree.heading('Status', text='Status')
+    PCB_tree.heading('STA', text='Status')
+    PCB_tree.heading('QET', text='Quantum Elapsed Time')
     PCB_tree.heading('AT', text='Arrival Time')
     PCB_tree.heading('FT', text='Finalization Time')
     PCB_tree.heading('ST', text='In-Service Time')
@@ -147,21 +149,26 @@ def generate_PCB():
 
     # Fill PCB_report
     for process in completed_tasks:
-        PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
+        PCB_tree.insert("", tk.END, values=(process.pid, process.status, "---", process.arrive, process.finalization, 
                                             process.service, process.response, process.ret, 
                                             process.wait))
     for process in main_memory:
         # Calculate estimated times
         wait = elapsed_time - process.arrive - process.elapsedT 
 
-        PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
+        if process.status == "In-Process":
+            qrt = f"{main_memory[0].quantum_remaining}"
+        else:
+            qrt = "---"
+
+        PCB_tree.insert("", tk.END, values=(process.pid, process.status, qrt, process.arrive, process.finalization, 
                                             f"{process.elapsedT} *", process.response, process.ret, 
                                             f"{wait} *"))
     for process in blocked_tasks:
         # Calculate estimated times
         wait = elapsed_time - process.arrive - process.elapsedT
 
-        PCB_tree.insert("", tk.END, values=(process.pid, process.status, process.arrive, process.finalization, 
+        PCB_tree.insert("", tk.END, values=(process.pid, process.status, "---", process.arrive, process.finalization, 
                                             f"{process.elapsedT} *", process.response, process.ret, 
                                             f"{wait} *"))
 
@@ -237,16 +244,16 @@ def update_tables():
             completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result))
 
 def start_simulation():
-    global pending_tasks, main_memory, simulation_started, num_tasks
+    global pending_tasks, main_memory, simulation_started, num_tasks, quantum
     
     if simulation_started:
         return  # Exit the function if the simulation has already started
     
     # Get the number of tasks from the input field
     try:
-        num_tasks = int(task_entry.get())
-        if num_tasks <= 0:
-            raise ValueError("Number of tasks must be greater than 0.")
+        quantum = int(quantum_entry.get())
+        if quantum <= 0:
+            raise ValueError("Quantum value must be greater than 0.")
     except ValueError as e:
         print(f"Invalid input: {e}")
         return
@@ -264,7 +271,7 @@ def start_simulation():
 
     # Disable the start button and entry field after the first use
     start_button.config(state=tk.DISABLED)
-    task_entry.config(state=tk.DISABLED)
+    quantum_entry.config(state=tk.DISABLED)
     
     # Set the flag to true
     simulation_started = True
@@ -284,7 +291,7 @@ window.bind("<Key>", toggle_pause)
 window.bind("<Key-i>", interruption)
 window.bind("<Key-e>", error)  
 window.bind("<Key-n>", new_process)
-window.bind("<Key-t>", view_PCB)   
+window.bind("<Key-b>", view_PCB)   
 
 ''' Frames General Configuration
 '''
@@ -315,11 +322,12 @@ ready_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 '''
 tk.Label(process_frame, text=":::  Task In Process  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
 
-process_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'RT', 'OP'), show='headings', height=10)
+process_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'RT', 'QET', 'OP'), show='headings', height=10)
 process_tree.heading('ID', text='ID')
 process_tree.heading('MT', text='Max Time')
 process_tree.heading('ET', text='Elapsed Time')
 process_tree.heading('RT', text='Remaining Time')
+process_tree.heading('QET', text='Quantum Elapsed Time')
 process_tree.heading('OP', text='Operation')
 
 process_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
@@ -349,16 +357,15 @@ completed_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
 ''' Control Panel Configuration
 '''
-tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::  N - New Process  :::  T - BCP Status  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
+tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::  N - New Process  :::  B - BCP Status  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
 remaining_tasks = tk.Label(control_frame, text="Remaining Tasks: ", bg="#373737", fg="white")
 remaining_tasks.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")
 time_keeper.grid(row=2, column=0, padx=10, pady=5, sticky="w")
-tk.Label(control_frame, text="Total Tasks: ", bg="#373737", fg="white").grid(row=3, column=0, padx=10, pady=5, sticky="w")
+tk.Label(control_frame, text="Quantum Value: ", bg="#373737", fg="white").grid(row=3, column=0, padx=10, pady=5, sticky="w")
 
-# Change task_entry and start_button to global variables
-task_entry = tk.Entry(control_frame, width=15)
-task_entry.grid(row=3, column=1, padx=5, pady=5)
+quantum_entry = tk.Entry(control_frame, width=15)
+quantum_entry.grid(row=3, column=1, padx=5, pady=5)
 
 start_button = tk.Button(control_frame, text="Start", bg="#46548e", fg="white", relief="flat", overrelief="flat", command=start_simulation)
 start_button.grid(row=3, column=2, padx=10, pady=5)
