@@ -294,7 +294,7 @@ def start_simulation():
 ''' Main Window General Configuration
 '''
 window = tk.Tk()
-window.title("Operating Systems: First Come First Served")
+window.title("Operating Systems: Round Robin")
 window.geometry("1200x600")
 window.configure(bg="#252525")
 
