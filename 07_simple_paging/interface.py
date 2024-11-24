@@ -1,11 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 from Process import *
+from MemFrame import *
 
 # Global variables
 elapsed_time = 0
 is_paused = False
-memory_size = 5
+memory_size = 240
 pending_tasks = []
 main_memory = []
 completed_tasks = []
@@ -13,6 +14,8 @@ blocked_tasks = []
 simulation_started = False 
 num_tasks = 0
 quantum = 0
+
+memory = []
 
 # This function will update the timer's label
 def update_time():
@@ -67,6 +70,7 @@ def error(event):
     if event.char.lower() == 'e' and main_memory and is_paused == False:
         process = main_memory.pop(0)  # Remove the first process (in execution)
         process.result = "## ERROR ##"
+        clear_memory(process)
         completed_tasks.append(process)  # Move it to the completed tasks list
         # BCP Completition
         process.service = process.elapsedT                  # Save the service time
@@ -93,14 +97,15 @@ def new_process(event):
         new_task = generate_processes(1)[0]
         new_task.pid = num_tasks
 
-        # If there's enough space on the main memory, add it directly there
-        if (len(main_memory) + len(blocked_tasks)) < 5:
+        # If there's enough space on the memory, add it 
+        if verify_availability(new_task):
             new_task.arrive = elapsed_time
             new_task.status = "Ready"
-            main_memory.append(new_task)   
-        else: 
-        # If there's not, add it to the pending tasks' list
-            pending_tasks.append(new_task)  
+            main_memory.append(new_task)
+            asign_frames(new_task)
+        else:
+        # If there's not enough space, add it to the pending tasks' list
+            pending_tasks.append(new_task)
 
         update_remaining_tasks()
 
@@ -177,8 +182,68 @@ def generate_PCB():
                                             f"{process.elapsedT} *", process.response, process.ret, 
                                             f"{wait} *"))
 
+def verify_availability(process):
+    global memory, memory_size
+    used = 0
+
+    for frame in memory:
+        if frame.used_space != 0:
+            used += 5
+
+    if used < memory_size:
+        availiable = memory_size - used
+    
+    if availiable >= process.size:
+        return True
+
+    return False
+
+def asign_frames(process):
+    global memory
+    process_size = process.size
+
+    # If the whole process size has been covered, exit
+    while process_size > 0:
+        # Search in the whole memory for empty spaces
+        for i in range (len(memory)):
+            if memory[i].used_space != 0:
+                continue
+            else:
+            # When an empty space is found, part of the process will be assigned to it
+                memory[i].PID = process.pid
+                memory[i].state = process.status
+                if process_size >= 5:
+                    memory[i].used_space = 5
+                    process_size -= 5
+                else:
+                    memory[i].used_space = process_size
+                    process_size = 0
+
+                if process_size == 0:
+                    break
+
+def clear_memory(process):
+    global memory
+
+    # Search for all the frames used by the process and reset them
+    for i in range (len(memory)):
+        if memory[i].PID == process.pid:
+            memory[i].reset_values()
+
+    update_tables()
+
+def update_memory(process):
+    global memory
+
+    # Search for all the frames used by the process and reset them
+    for i in range (len(memory)):
+        if memory[i].PID == process.pid:
+            memory[i].state = process.status
+
+    update_tables()
+
 def process_memory():
-    global main_memory, completed_tasks, pending_tasks, quantum, elapsed_time
+    global main_memory, completed_tasks, pending_tasks, quantum, elapsed_time, memory
 
     # If there are loaded processes in memory
     if main_memory:
@@ -207,9 +272,10 @@ def process_memory():
             process.status = "Completed: Success"
 
             completed_tasks.append(process)  # Move it to completed tasks
+            clear_memory(process)
 
             main_memory.pop(0) # delete the completed process from memory
-            
+
             if pending_tasks:  # If there are pending tasks
                 process = pending_tasks.pop(0)
                 # Save arrival time to the memory
@@ -256,8 +322,16 @@ def update_tables():
 
         completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result))
 
+    # Update Memory Frames Viewer
+    for row in memory_tree.get_children():
+        memory_tree.delete(row)
+
+    for i in range(0, len(memory)//4):
+        memory_tree.insert("", tk.END, values=(memory[i].toString(), memory[i+12].toString(),
+                                               memory[i+24].toString(), memory[i+36].toString()))
+
 def start_simulation():
-    global pending_tasks, main_memory, simulation_started, num_tasks, quantum
+    global pending_tasks, main_memory, simulation_started, num_tasks, quantum, memory
     
     if simulation_started:
         return  # Exit the function if the simulation has already started
@@ -288,6 +362,17 @@ def start_simulation():
         task.arrive = 0
         task.status = "Ready"
     pending_tasks = pending_tasks[memory_size:]
+
+    # Create empty memory frames
+    for i in range (0, 48):
+        frame = MemFrame(i)
+        
+        if i <= 3:
+            frame.state = "OS"
+            frame.PID = "OS"
+            frame.used_space = 5
+
+        memory.append(frame)
     
     # Update tables
     update_tables()
@@ -360,7 +445,7 @@ process_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 '''
 tk.Label(process_frame, text=":::  Blocked Tasks  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=2, sticky="new")
 
-blocked_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'BRT'), show='headings', height=8)
+blocked_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'BRT'), show='headings', height=7)
 blocked_tree.heading('ID', text='ID')
 blocked_tree.heading('MT', text='Max Time')
 blocked_tree.heading('ET', text='Elapsed Time')
@@ -372,7 +457,7 @@ blocked_tree.grid(row=3, padx=5, pady=5, sticky="nsew")
 '''
 tk.Label(process_frame, text=":::  Memory   :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=4, sticky="new")
 
-memory_tree = ttk.Treeview(process_frame, columns=('0-11', '12-23', '24-35', '36-47'), show='headings', height=12)
+memory_tree = ttk.Treeview(process_frame, columns=('0-11', '12-23', '24-35', '36-47'), show='headings', height=13)
 memory_tree.heading('0-11', text='0-11')
 memory_tree.heading('12-23', text='12-23')
 memory_tree.heading('24-35', text='24-35')
@@ -398,8 +483,6 @@ remaining_tasks = tk.Label(control_frame, text="Remaining Tasks: ", bg="#373737"
 remaining_tasks.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")
 time_keeper.grid(row=2, column=0, padx=10, pady=5, sticky="w")
-quantum_time = tk.Label(control_frame, text="Quantum Timer: 0 s", bg="#373737", fg="white")
-quantum_time.grid(row=3,column=0, padx=10, pady=5, sticky="w")
 
 tk.Label(control_frame, text="Quantum Value: ", bg="#373737", fg="white").grid(row=1, column=1, padx=10, pady=5, sticky="w")
 tk.Label(control_frame, text="Total Tasks: ", bg="#373737", fg="white").grid(row=2, column=1, padx=10, pady=5, sticky="w")
