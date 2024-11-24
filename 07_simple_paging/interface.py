@@ -66,6 +66,7 @@ def error(event):
     global main_memory, completed_tasks
     if event.char.lower() == 'e' and main_memory and is_paused == False:
         process = main_memory.pop(0)  # Remove the first process (in execution)
+        process.result = "## ERROR ##"
         completed_tasks.append(process)  # Move it to the completed tasks list
         # BCP Completition
         process.service = process.elapsedT                  # Save the service time
@@ -177,16 +178,16 @@ def generate_PCB():
                                             f"{wait} *"))
 
 def process_memory():
-    global main_memory, completed_tasks, pending_tasks, quantum
+    global main_memory, completed_tasks, pending_tasks, quantum, elapsed_time
 
     # If there are loaded processes in memory
     if main_memory:
         process = main_memory[0]  # Get the first process
         if process.response == -1:
             if process.pid == 1:
-                process.response = 0
+                process.response = 1
             else:
-                process.response = elapsed_time - process.arrive
+                process.response = elapsed_time - process.arrive -1
         process.update_time()  # Update its elapsed time
         update_tables()
 
@@ -205,7 +206,9 @@ def process_memory():
             process.wait = process.ret - process.service        # Calculate and save wait time
             process.status = "Completed: Success"
 
-            completed_tasks.append(main_memory.pop(0))  # Move it to completed tasks
+            completed_tasks.append(process)  # Move it to completed tasks
+
+            main_memory.pop(0) # delete the completed process from memory
             
             if pending_tasks:  # If there are pending tasks
                 process = pending_tasks.pop(0)
@@ -248,11 +251,10 @@ def update_tables():
     for row in completed_tree.get_children():
         completed_tree.delete(row)
     for process in completed_tasks:
-        process.solve()
-        if process.maxT != process.elapsedT:
-            completed_tree.insert("", tk.END, values=(process.pid, process.op, "## ERROR ##"))
-        elif process.maxT == process.elapsedT:
-            completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result))
+        if process.result == "":
+            process.solve()
+
+        completed_tree.insert("", tk.END, values=(process.pid, process.op, process.result))
 
 def start_simulation():
     global pending_tasks, main_memory, simulation_started, num_tasks, quantum
@@ -283,7 +285,7 @@ def start_simulation():
     update_remaining_tasks()
     main_memory = pending_tasks[:memory_size]
     for task in main_memory:
-        task.arrive = elapsed_time
+        task.arrive = 0
         task.status = "Ready"
     pending_tasks = pending_tasks[memory_size:]
     
