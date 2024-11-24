@@ -11,7 +11,7 @@ main_memory = []
 completed_tasks = []
 blocked_tasks = []
 simulation_started = False 
-num_tasks = 3
+num_tasks = 0
 quantum = 0
 
 # This function will update the timer's label
@@ -268,6 +268,15 @@ def start_simulation():
     except ValueError as e:
         print(f"Invalid input: {e}")
         return
+    
+    # Get the number of tasks from the input field
+    try:
+        num_tasks = int(task_entry.get())
+        if num_tasks <= 0:
+            raise ValueError("Number of tasks must be greater than 0.")
+    except ValueError as e:
+        print(f"Invalid input: {e}")
+        return
 
     # Generate processes
     pending_tasks = generate_processes(num_tasks)
@@ -283,6 +292,7 @@ def start_simulation():
 
     # Disable the start button and entry field after the first use
     start_button.config(state=tk.DISABLED)
+    task_entry.config(state=tk.DISABLED)
     quantum_entry.config(state=tk.DISABLED)
     
     # Set the flag to true
@@ -323,7 +333,7 @@ control_frame.grid(row=1, column=0, columnspan=3, padx=5, pady=(0,5), sticky="ns
 '''
 tk.Label(ready_frame, text=":::  Ready  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, sticky="ew")
 
-ready_tree = ttk.Treeview(ready_frame, columns=('ID', 'MT', 'ET'), show='headings', height=10)
+ready_tree = ttk.Treeview(ready_frame, columns=('ID', 'MT', 'ET'), show='headings', height=1)
 ready_tree.heading('ID', text='ID')
 ready_tree.heading('MT', text='Max Time')
 ready_tree.heading('ET', text='Elapsed Time')
@@ -334,7 +344,7 @@ ready_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 '''
 tk.Label(process_frame, text=":::  Task In Process  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, sticky="new")
 
-process_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'RT', 'QET', 'OP'), show='headings', height=10)
+process_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'RT', 'QET', 'OP'), show='headings', height=1)
 process_tree.heading('ID', text='ID')
 process_tree.heading('MT', text='Max Time')
 process_tree.heading('ET', text='Elapsed Time')
@@ -348,13 +358,25 @@ process_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 '''
 tk.Label(process_frame, text=":::  Blocked Tasks  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=2, sticky="new")
 
-blocked_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'BRT'), show='headings', height=10)
+blocked_tree = ttk.Treeview(process_frame, columns=('ID', 'MT', 'ET', 'BRT'), show='headings', height=8)
 blocked_tree.heading('ID', text='ID')
 blocked_tree.heading('MT', text='Max Time')
 blocked_tree.heading('ET', text='Elapsed Time')
 blocked_tree.heading('BRT', text='Blocked Remaining Time')
 
 blocked_tree.grid(row=3, padx=5, pady=5, sticky="nsew")
+
+''' Memory Table Panel Configuration
+'''
+tk.Label(process_frame, text=":::  Memory   :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=4, sticky="new")
+
+memory_tree = ttk.Treeview(process_frame, columns=('0-11', '12-23', '24-35', '36-47'), show='headings', height=12)
+memory_tree.heading('0-11', text='0-11')
+memory_tree.heading('12-23', text='12-23')
+memory_tree.heading('24-35', text='24-35')
+memory_tree.heading('36-47', text='36-47')
+
+memory_tree.grid(row=5, padx=5, pady=5, sticky="nsew")
 
 ''' Completed Tasks' Panel Configuration
 '''
@@ -369,18 +391,25 @@ completed_tree.grid(row=1, padx=5, pady=5, sticky="nsew")
 
 ''' Control Panel Configuration
 '''
-tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::  N - New Process  :::  B - BCP Status  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=3, padx=10, pady=5, sticky="w")
+tk.Label(control_frame, text=":::  P - Pause  :::  C - Continue  :::  I - Interruption  :::  E - Error  :::  N - New Process  :::  B - BCP Status  :::  T - Pages Table  :::", bg="#373737", fg="white", font=('Helvetica', 10, 'bold')).grid(row=0, column=0, columnspan=4, padx=10, pady=5, sticky="w")
 remaining_tasks = tk.Label(control_frame, text="Remaining Tasks: ", bg="#373737", fg="white")
 remaining_tasks.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 time_keeper = tk.Label(control_frame, text="Total Elapsed Time: 0 s", bg="#373737", fg="white")
 time_keeper.grid(row=2, column=0, padx=10, pady=5, sticky="w")
-tk.Label(control_frame, text="Quantum Value: ", bg="#373737", fg="white").grid(row=3, column=0, padx=10, pady=5, sticky="w")
+quantum_time = tk.Label(control_frame, text="Quantum Timer: 0 s", bg="#373737", fg="white")
+quantum_time.grid(row=3,column=0, padx=10, pady=5, sticky="w")
+
+tk.Label(control_frame, text="Quantum Value: ", bg="#373737", fg="white").grid(row=1, column=1, padx=10, pady=5, sticky="w")
+tk.Label(control_frame, text="Total Tasks: ", bg="#373737", fg="white").grid(row=2, column=1, padx=10, pady=5, sticky="w")
 
 quantum_entry = tk.Entry(control_frame, width=15)
-quantum_entry.grid(row=3, column=1, padx=5, pady=5)
+quantum_entry.grid(row=1, column=2, padx=5, pady=5)
+
+task_entry = tk.Entry(control_frame, width=15)
+task_entry.grid(row=2, column=2, padx=5, pady=5)
 
 start_button = tk.Button(control_frame, text="Start", bg="#46548e", fg="white", relief="flat", overrelief="flat", command=start_simulation)
-start_button.grid(row=3, column=2, padx=10, pady=5)
+start_button.grid(row=1, column=3, padx=10, pady=5)
 
 # Expand rows and columns
 window.grid_rowconfigure(0, weight=1)
@@ -390,8 +419,15 @@ window.grid_columnconfigure(2, weight=1)
 
 ready_frame.grid_rowconfigure(1, weight=1)
 ready_frame.grid_columnconfigure(0, weight=1)
-process_frame.grid_rowconfigure(1, weight=1)
-process_frame.grid_columnconfigure(0, weight=1)
+
+process_frame.grid_rowconfigure(0, weight=0) 
+process_frame.grid_rowconfigure(1, weight=0) 
+process_frame.grid_rowconfigure(2, weight=0)  
+process_frame.grid_rowconfigure(3, weight=1)  
+process_frame.grid_rowconfigure(4, weight=0)  
+process_frame.grid_rowconfigure(5, weight=1) 
+process_frame.grid_columnconfigure(0, weight=1) 
+
 completed_frame.grid_rowconfigure(1, weight=1)
 completed_frame.grid_columnconfigure(0, weight=1)
 

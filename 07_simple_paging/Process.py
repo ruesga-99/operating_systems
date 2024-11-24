@@ -5,8 +5,10 @@ def generate_processes (n):
     processes = []
 
     for i in range (1, n+1):
-        max_time = random.randint(1, 10)
+        max_time = random.randint(5, 20)
         process = Process(i, max_time, generate_operation())
+        size = random.randint(6, 26)
+        process.size = size
         processes.append(process)
 
     return processes
@@ -46,6 +48,8 @@ class Process:
         self.ret = -1
         self.service = -1
         self.wait = -1
+
+        self.size = 0    # Space the process will take in memory
 
         self.status = "" # Control status: completed, ready, in-process, suspended
 
