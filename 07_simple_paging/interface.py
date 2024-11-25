@@ -81,12 +81,13 @@ def error(event):
         process.status = "Completed: Error"
 
         if pending_tasks:
-            new_task = pending_tasks.pop(0)
-            if new_task.arrive == -1:
-                new_task.arrive = elapsed_time
-                new_task.status = "Ready"
-            main_memory.append(new_task)
-            assign_frames(new_task)
+            if verify_availability(pending_tasks[0]):
+                new_task = pending_tasks.pop(0)
+                if new_task.arrive == -1:
+                    new_task.arrive = elapsed_time
+                    new_task.status = "Ready"
+                main_memory.append(new_task)
+                assign_frames(new_task)
             
         update_remaining_tasks()
         update_tables()  # Update tables to reflect the new state
@@ -276,13 +277,15 @@ def process_memory():
 
             main_memory.pop(0) # delete the completed process from memory
 
-            if pending_tasks:  # If there are pending tasks
-                process = pending_tasks.pop(0)
-                # Save arrival time to the memory
-                if process.arrive == -1:
-                    process.arrive = elapsed_time
-                    process.status = "Ready"
-                main_memory.append(process)
+            if pending_tasks:
+                if verify_availability(pending_tasks[0]):
+                    process = pending_tasks.pop(0)
+                    if process.arrive == -1:
+                        process.arrive = elapsed_time
+                        process.status = "Ready"
+                    main_memory.append(process)
+                    assign_frames(process)
+
             update_remaining_tasks()
             update_tables()
 
@@ -407,7 +410,7 @@ def start_simulation():
 ''' Main Window General Configuration
 '''
 window = tk.Tk()
-window.title("Operating Systems: Round Robin")
+window.title("Operating Systems: Round Robin and Simple Paging")
 window.geometry("1200x600")
 window.configure(bg="#252525")
 
