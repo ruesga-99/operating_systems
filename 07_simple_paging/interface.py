@@ -62,6 +62,7 @@ def interruption(event):
         process.status = "Blocked"
         process.quantum_elapsed = 0
         blocked_tasks.append(process)  # Add it to the end of the in-ready list
+        update_memory(process)
         update_tables()  # Update tables to reflect the new state
 
 # Function to manage error events
@@ -85,6 +86,7 @@ def error(event):
                 new_task.arrive = elapsed_time
                 new_task.status = "Ready"
             main_memory.append(new_task)
+            assign_frames(new_task)
             
         update_remaining_tasks()
         update_tables()  # Update tables to reflect the new state
@@ -102,7 +104,7 @@ def new_process(event):
             new_task.arrive = elapsed_time
             new_task.status = "Ready"
             main_memory.append(new_task)
-            asign_frames(new_task)
+            assign_frames(new_task)
         else:
         # If there's not enough space, add it to the pending tasks' list
             pending_tasks.append(new_task)
@@ -198,7 +200,7 @@ def verify_availability(process):
 
     return False
 
-def asign_frames(process):
+def assign_frames(process):
     global memory
     process_size = process.size
 
@@ -239,8 +241,6 @@ def update_memory(process):
     for i in range (len(memory)):
         if memory[i].PID == process.pid:
             memory[i].state = process.status
-
-    update_tables()
 
 def process_memory():
     global main_memory, completed_tasks, pending_tasks, quantum, elapsed_time, memory
@@ -299,6 +299,7 @@ def update_tables():
     if main_memory:
         process = main_memory[0]
         process.status = "In-Process"
+        update_memory(process)
         process_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, 
                                                 process.remainingT, process.quantum_elapsed, process.op))
     
@@ -310,6 +311,7 @@ def update_tables():
             blocked_tree.insert("", tk.END, values=(process.pid, process.maxT, process.elapsedT, process.blockedT))
         else: 
             process.status = "Ready"
+            update_memory(process)
             main_memory.append(process)
             blocked_tasks.remove(process)
 
@@ -357,11 +359,6 @@ def start_simulation():
     # Generate processes
     pending_tasks = generate_processes(num_tasks)
     update_remaining_tasks()
-    main_memory = pending_tasks[:memory_size]
-    for task in main_memory:
-        task.arrive = 0
-        task.status = "Ready"
-    pending_tasks = pending_tasks[memory_size:]
 
     # Create empty memory frames
     for i in range (0, 48):
@@ -374,6 +371,25 @@ def start_simulation():
 
         memory.append(frame)
     
+    assigned = 0
+
+    # Assign empty spaces to the starting processes
+    for task in pending_tasks:
+        # If there's enough space on the memory, add it 
+        if verify_availability(task):
+            task.arrive = elapsed_time
+            task.status = "Ready"
+            main_memory.append(task)
+            assign_frames(task)
+            assigned += 1
+        else:
+            break
+    
+    # Remove already assigned tasks from the pending queue
+    while assigned > 0:
+        pending_tasks.pop(0)
+        assigned -= 1
+
     # Update tables
     update_tables()
 
