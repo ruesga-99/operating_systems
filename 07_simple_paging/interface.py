@@ -25,13 +25,16 @@ def update_time():
         time_keeper.config(text=f"Total Elapsed Time: {elapsed_time} s")
         process_memory()
 
-        # Update blocked processes if existent
+        # Update blocked processes if existing
         if blocked_tasks:
             for process in blocked_tasks:
                 process.blockedT -= 1
 
         if main_memory:
             main_memory[0].quantum_elapsed += 1
+
+    for i in main_memory:
+        update_memory(i)
 
     if pending_tasks or main_memory or blocked_tasks:
         window.after(1000, update_time)  # Update each second
@@ -100,15 +103,15 @@ def new_process(event):
         new_task = generate_processes(1)[0]
         new_task.pid = num_tasks
 
+        pending_tasks.append(new_task)
+
         # If there's enough space on the memory, add it 
-        if verify_availability(new_task):
-            new_task.arrive = elapsed_time
-            new_task.status = "Ready"
-            main_memory.append(new_task)
-            assign_frames(new_task)
-        else:
-        # If there's not enough space, add it to the pending tasks' list
-            pending_tasks.append(new_task)
+        if verify_availability(pending_tasks[0]):
+            pending_tasks[0].arrive = elapsed_time
+            pending_tasks[0].status = "Ready"
+            main_memory.append(pending_tasks[0])
+            assign_frames(pending_tasks[0])
+            pending_tasks.pop(0)
 
         update_remaining_tasks()
 
@@ -162,7 +165,13 @@ def generate_PCB():
 
     # Fill PCB_report
     for process in completed_tasks:
-        PCB_tree.insert("", tk.END, values=(process.pid, process.status, "---", process.arrive, process.finalization, 
+        status = ""
+        if process.result != "## ERROR ##":
+            status = "Completed: Succes"
+        else:
+            status = "Completed: Error"
+
+        PCB_tree.insert("", tk.END, values=(process.pid, status, "---", process.arrive, process.finalization, 
                                             process.service, process.response, process.ret, 
                                             process.wait))
     for process in main_memory:
@@ -184,6 +193,11 @@ def generate_PCB():
         PCB_tree.insert("", tk.END, values=(process.pid, process.status, "---", process.arrive, process.finalization, 
                                             f"{process.elapsedT} *", process.response, process.ret, 
                                             f"{wait} *"))
+
+def view_memory_frames(event):
+    global is_paused
+    if event.char.lower() == 't':
+        is_paused = True
 
 def verify_availability(process):
     global memory, memory_size
@@ -419,7 +433,8 @@ window.bind("<Key>", toggle_pause)
 window.bind("<Key-i>", interruption)
 window.bind("<Key-e>", error)  
 window.bind("<Key-n>", new_process)
-window.bind("<Key-b>", view_PCB)   
+window.bind("<Key-b>", view_PCB)  
+window.bind("<Key-t>", view_memory_frames) 
 
 ''' Frames General Configuration
 '''
