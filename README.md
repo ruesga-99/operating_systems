@@ -13,6 +13,11 @@ This repository contains various programs that simulate request management using
   <dd> &nbsp&nbsp ✅ Simple Paging </dd>
 </dl>
 
+## Additionals
+<dl>
+  <dd> &nbsp&nbsp 📆 7-State Process Model (FSM) </dd>
+</dl>
+
 ## Emoji Key
 ✅ (Completed): This emoji is used to mark tasks that have been finished and require no further work.
 
